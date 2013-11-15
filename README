@@ -1,0 +1,12 @@
+Configuration parser for DDSIM
+==============================
+
+This is a simple configurator parser for the DDSIM simulator.
+
+Try with make and then ./main.elf.
+
+Also try doing:
+
+./main.elf --config QC.massX 12.34
+
+And see how it changes.
