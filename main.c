@@ -18,6 +18,8 @@ int main(int argc, char *argv[]){
 	printf("Masa para Y en double: %lf\n", cfg_double("QC","massY"));
 	printf("Masa para X en string: [%s]\n", cfg_get("QC","massX"));
 	printf("Masa para Y en string: [%s]\n", cfg_get("QC","massY"));
+	printf("Flag QC.activate en string: [%s]\n", cfg_get("QC", "activate"));
+	printf("Flag QC.activate en bool: [%d]\n", cfg_bool("QC", "activate"));
 
 	return EXIT_SUCCESS;
 }

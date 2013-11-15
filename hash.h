@@ -3,5 +3,5 @@ struct nlist {
 	char * key;
 	void * value;
 };
-struct nlist *lookup(char *s);
-struct nlist *install(char *name, char *defn, size_t size);
+struct nlist *lookup(const char *);
+struct nlist *install(const char *, const char *);

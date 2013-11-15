@@ -16,7 +16,7 @@ struct nlist {
 static struct nlist *hashtab[HASHSIZE]; /* pointer table */
 
 /* hash: form hash value for string s */
-unsigned hash(char *s)
+unsigned hash(const char *s)
 {
 	unsigned hashval;
 	for(hashval=0; *s!='\0';s++)
@@ -25,7 +25,7 @@ unsigned hash(char *s)
 }
 
 /* lookup: look for s in hashtab */
-struct nlist *lookup(char *s)
+struct nlist *lookup(const char *s)
 {
 	struct nlist *np;
 	for (np = hashtab[hash(s)]; np != NULL; np = np->next)
@@ -35,7 +35,7 @@ struct nlist *lookup(char *s)
 }
 
 /* install: put (name, defn) in hashtab */
-struct nlist *install(char *name, char *defn)
+struct nlist *install(const char *name, const char *defn)
 {
 	struct nlist *np;
 	unsigned hashval;
