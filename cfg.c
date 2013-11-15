@@ -11,6 +11,7 @@ static int handler( void* configuration,
 	new_str = malloc(strlen(section) + strlen(option) + 2);
 	sprintf(new_str, "%s.%s", section, option);
 	install(new_str, value);
+	free(new_str);
 };
 
 int cfg_parse(){
@@ -38,6 +39,7 @@ char * cfg_get(const char * section, const char * option){
 	char *new_str = malloc(strlen(section) + strlen(option) + 2);
 	sprintf(new_str, "%s.%s", section, option);
 	search = lookup(new_str);
+	free(new_str);
 	if( search==NULL )
 		return NULL;
 	return search->value;
