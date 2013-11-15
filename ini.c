@@ -109,7 +109,7 @@ int ini_parse_file(FILE* file,
 #endif
         start = lskip(rstrip(start));
 
-        if (*start == '#' || *start == '#') {
+        if (*start == '#') {
             /* Per Python ConfigParser, allow '#' comments at start of line */
         }
 #if INI_ALLOW_MULTILINE

@@ -25,11 +25,15 @@ int cfg_parse_args(int argc, char *argv[]){
 	parsing_value = 0;
 	for(i=0; i<argc; i++){
 		if( strcmp(argv[i], "--config")==0 ){
+			if( i+2 >= argc ){
+				return 1;
+			}
 			key = argv[++i];
 			value = argv[++i];
 			install(key, value, strlen(value)+1);
 		};
 	};
+	return 0;
 };
 
 char * cfg_get(const char * section, const char * option){

@@ -9,7 +9,7 @@
 struct nlist {
 	struct nlist * next;
 	char * key;
-	void * value;
+	char * value;
 };
 
 #define HASHSIZE 101
@@ -35,7 +35,7 @@ struct nlist *lookup(char *s)
 }
 
 /* install: put (name, defn) in hashtab */
-struct nlist *install(char *name, char *defn, size_t size)
+struct nlist *install(char *name, char *defn)
 {
 	struct nlist *np;
 	unsigned hashval;
@@ -48,20 +48,7 @@ struct nlist *install(char *name, char *defn, size_t size)
 		hashtab[hashval] = np;
 	} else /* already there */
 		free((void *) np->value); /*free previous defn */
-	np->value = malloc(size);
-	if (memcpy(np->value, defn, size) == NULL)
+	if ((np->value = strdup(defn)) == NULL)
+		return NULL;
 	return np;
 }
-
-/*
-int main(){
-	install("QC.massX", "1.23", 5);
-	install("QC.massY", "23.12342", 8);
-
-	struct nlist * search;
-	search = lookup("QC.massX");
-	puts((char*)search->value);
-	search = lookup("QC.massY");
-	puts((char*)search->value);
-};
-*/
