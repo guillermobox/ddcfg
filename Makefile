@@ -1,9 +1,12 @@
+FLAGS=
+#FLAGS=-pg #this flag is for profiling
 
 all:
-	$(CC) $(CFLAGS) -c ini.c
-	$(CC) $(CFLAGS) -c hash.c
-	$(CC) $(CFLAGS) -c cfg.c
-	$(CC) $(CFLGAS) ini.o cfg.o hash.o main.c -o main.elf
+	$(CC) $(CFLAGS) $(FLAGS) -c ini.c
+	$(CC) $(CFLAGS) $(FLAGS) -c hash.c
+	$(CC) $(CFLAGS) $(FLAGS) -c cfg.c
+	$(CC) $(CFLGAS) $(FLAGS) -c main.c
+	$(CC) $(FLAGS) ini.o hash.o cfg.o main.o -o main.elf
 
 clean:
 	rm -f *.o *.elf
