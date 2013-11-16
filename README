@@ -9,4 +9,9 @@ Also try doing:
 
 ./main.elf --config QC.massX 12.34
 
-And see how it changes.
+And see how it changes, or with a bool:
+
+./main.elf --config QC.activate TRUE
+./main.elf --config QC.activate 1
+./main.elf --config QC.activate trUE
+
