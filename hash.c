@@ -15,7 +15,7 @@ struct nlist {
 #define HASHSIZE 101
 static struct nlist *hashtab[HASHSIZE]; /* pointer table */
 
-/* hash: form hash value for string s */
+/* form hash value for string s */
 unsigned hash(const char *s)
 {
 	unsigned hashval;
@@ -24,7 +24,7 @@ unsigned hash(const char *s)
 	return hashval % HASHSIZE;
 }
 
-/* lookup: look for s in hashtab */
+/* look for s in hashtab */
 struct nlist *lookup(const char *s)
 {
 	struct nlist *np;
@@ -34,21 +34,21 @@ struct nlist *lookup(const char *s)
 	return NULL; /* not found */
 }
 
-/* install: put (name, defn) in hashtab */
-struct nlist *install(const char *name, const char *defn)
+/* put (key, value) in hashtab */
+struct nlist *install(const char *key, const char *value)
 {
 	struct nlist *np;
 	unsigned hashval;
-	if ((np = lookup(name)) == NULL) { /* not found */
+	if ((np = lookup(key)) == NULL) { /* not found */
 		np = (struct nlist *) malloc(sizeof(*np));
-		if (np == NULL || (np->key = strdup(name)) == NULL)
+		if (np == NULL || (np->key = strdup(key)) == NULL)
 			return NULL;
-		hashval = hash(name);
+		hashval = hash(key);
 		np->next = hashtab[hashval];
 		hashtab[hashval] = np;
 	} else /* already there */
-		free((void *) np->value); /*free previous defn */
-	if ((np->value = strdup(defn)) == NULL)
+		free((void *) np->value); /*free previous value */
+	if ((np->value = strdup(value)) == NULL)
 		return NULL;
 	return np;
 }
