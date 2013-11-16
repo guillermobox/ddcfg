@@ -9,4 +9,4 @@ all:
 	$(CC) $(FLAGS) ini.o hash.o ddcfg.o main.o -o main.elf
 
 clean:
-	rm -f *.o *.elf
+	rm -f *.o *.elf *~

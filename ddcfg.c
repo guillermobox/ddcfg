@@ -6,7 +6,7 @@
 
 static char *errorNotFound = "ddcfg:Error when reading %s.%s: not found\n";
 static char *errorNotParse =
-    "ddcfg:Error whenc casting %s.%s to type %s: '%s' not parseable\n";
+    "ddcfg:Error when casting %s.%s to type %s: '%s' not parseable\n";
 
 static void die(const char *section, const char *option, const char *cast,
 		const char *value)
@@ -25,15 +25,20 @@ static int handler(void *configuration, const char *section,
 {
 	char *newstr;
 
-	newstr = malloc(strlen(section) + strlen(option) + 2);
-	sprintf(newstr, "%s.%s", section, option);
-	install(newstr, value);
-	free(newstr);
+	if (strlen(section) == 0) {
+		install(option, value);
+	} else {
+		newstr = malloc(strlen(section) + strlen(option) + 2);
+		sprintf(newstr, "%s.%s", section, option);
+		install(newstr, value);
+		free(newstr);
+	}
+	return 1; /* inih needs a non-zero return on success (???) */
 };
 
 int ddcfg_parse(const char *filename)
 {
-	ini_parse(filename, handler, NULL);
+	return ini_parse(filename, handler, NULL);
 };
 
 int ddcfg_parse_args(int argc, char *argv[])
@@ -58,10 +63,14 @@ char *ddcfg_get(const char *section, const char *option)
 	struct nlist *search;
 	char *newstr;
 
-	newstr = malloc(strlen(section) + strlen(option) + 2);
-	sprintf(newstr, "%s.%s", section, option);
-	search = lookup(newstr);
-	free(newstr);
+	if (section == NULL || strlen(section) == 0) {
+		search = lookup(option);
+	} else {
+		newstr = malloc(strlen(section) + strlen(option) + 2);
+		sprintf(newstr, "%s.%s", section, option);
+		search = lookup(newstr);
+		free(newstr);
+	}
 	if (search == NULL)
 		die(section, option, NULL, NULL);
 	return search->value;

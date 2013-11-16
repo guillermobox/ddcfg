@@ -3,6 +3,9 @@
  * Header file for density-gradient configuration parser
  */
 
+#ifndef __DDCFG_H__
+#define __DDCFG_H__
+
 /* Parse a file to the dictionary of key/value pairs. Call this
  * before any other call, otherwise they will return error.
  */
@@ -25,3 +28,5 @@ char *ddcfg_get(const char *section, const char *option);
 int ddcfg_int(const char *section, const char *option);
 int ddcfg_bool(const char *section, const char *option);
 double ddcfg_double(const char *section, const char *option);
+
+#endif
