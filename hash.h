@@ -5,3 +5,4 @@ struct nlist {
 };
 struct nlist *lookup(const char *);
 struct nlist *install(const char *, const char *);
+char **getall();

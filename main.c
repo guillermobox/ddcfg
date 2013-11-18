@@ -22,5 +22,6 @@ int main(int argc, char *argv[])
 	printf("QC.activate: [%s] (%d)\n", ddcfg_get("QC", "activate"), ddcfg_bool("QC", "activate"));
 	printf("alone option: [%s]\n", ddcfg_get(NULL, "alone"));
 
+	ddcfg_dump("# OPTIONS", stdout);
 	return EXIT_SUCCESS;
 };

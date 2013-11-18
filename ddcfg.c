@@ -120,3 +120,22 @@ int ddcfg_bool(const char *section, const char *option)
 	else
 		die(section, option, "bool", answer);
 };
+
+void ddcfg_dump(const char *header, FILE *fout){
+	char **items;
+	int i;
+	
+	if (header != NULL )
+		fprintf(fout, "%s\n", header);
+
+	items = getall();
+	for (i = 0; items[i] != NULL; i++) {
+		fputs(items[i], fout);
+		free(items[i]);
+	}
+
+	if (header != NULL )
+		fprintf(fout, "%s\n", header);
+
+	free(items);
+};

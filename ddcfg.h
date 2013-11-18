@@ -17,6 +17,11 @@ int ddcfg_parse(char *filename);
  */
 int ddcfg_parse_args(int argc, char **argv);
 
+/* This function will print in the standard output, or any other file,
+ * all the pairs found in the dictionary.
+ */
+void ddcfg_dump(const char *header, FILE *fout);
+
 /* This function will return a pointer to a string of the specified
  * section and options. No parsing is done.
  */
