@@ -27,14 +27,4 @@ def include_file(filename):
     f.close()
     return data
 
-f = open(MAINFILE, "r")
-for line in f.readlines():
-    mat = re.match(r'#include "(.*)\.h"', line)
-    if mat:
-        filename = mat.groups()[0]
-        print include_file(filename + '.h')
-        print include_file(filename + '.c')
-    else:
-        print line[:-1]
-
-f.close()
+print include_file(MAINFILE)
