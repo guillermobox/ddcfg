@@ -113,10 +113,16 @@ int ddcfg_bool(const char *section, const char *option)
 		if (lower[i] >= 'A' && lower[i] <= 'Z')
 			lower[i] += 32;
 	}
-	if (strcmp(lower, "true") == 0 || strcmp(lower, "1") == 0){
+	if (strcmp(lower, "true") == 0 ||
+			strcmp(lower, "on") == 0 ||
+			strcmp(lower, "yes") == 0 ||
+			strcmp(lower, "1") == 0) {
 		free(lower);
 		return 1;
-	}else if (strcmp(lower, "false") == 0 || strcmp(lower, "0") == 0){
+	}else if (strcmp(lower, "false") == 0 ||
+			strcmp(lower, "off") == 0 ||
+			strcmp(lower, "no") == 0 ||
+			strcmp(lower, "0") == 0) {
 		free(lower);
 		return 0;
 	}else{
