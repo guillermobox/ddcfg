@@ -5,14 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "hash.h"
 
-struct nlist {
-	struct nlist *next;
-	char *key;
-	char *value;
-};
-
-#define HASHSIZE 101
 static struct nlist *hashtab[HASHSIZE];	/* pointer table */
 
 /* form hash value for string s */
