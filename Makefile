@@ -1,4 +1,4 @@
-FLAGS=
+FLAGS=-g
 #FLAGS=-pg #this flag is for profiling
 
 all:

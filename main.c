@@ -23,5 +23,6 @@ int main(int argc, char *argv[])
 	printf("alone option: [%s]\n", ddcfg_get(NULL, "alone"));
 
 	ddcfg_dump("# OPTIONS", stdout);
+	ddcfg_free();
 	return EXIT_SUCCESS;
 };

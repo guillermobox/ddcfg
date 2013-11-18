@@ -67,6 +67,8 @@ char **getall(void){
 
 	iitem = 0;
 	items = malloc(1024 * sizeof(char*));
+	for (i = 0; i < 1024; i++)
+		items[i] = NULL;
 
 	for (i = 0; i < HASHSIZE; i++) {
 		np = hashtab[i];
@@ -79,4 +81,24 @@ char **getall(void){
 
 	qsort(items, iitem, sizeof(char*), strcomp);
 	return items;
+}
+
+/* free all the keys defined */
+void freeall(void){
+	struct nlist *np, *next;
+	int i;
+	char **items;
+	char buffer[128];
+
+	for (i = 0; i < HASHSIZE; i++) {
+		np = hashtab[i];
+		while (np != NULL) {
+			next = np->next;
+			free(np->value);
+			free(np->key);
+			free(np);
+			np = next;
+		}
+		np = NULL;
+	}
 }

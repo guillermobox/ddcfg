@@ -17,6 +17,11 @@ int ddcfg_parse(char *filename);
  */
 int ddcfg_parse_args(int argc, char **argv);
 
+/* Free all the information stored about the actual configuration,
+ * this will return the database to its initial state
+ */
+void ddcfg_free();
+
 /* This function will print in the standard output, or any other file,
  * all the pairs found in the dictionary.
  */
