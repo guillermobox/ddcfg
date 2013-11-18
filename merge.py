@@ -3,9 +3,6 @@
 #
 import re
 
-MAINFILE = "ddcfg.c"
-OTHERFILES = ["hash.c", "ini.c"]
-
 included_files = []
 
 def include_file(filename):
@@ -27,4 +24,4 @@ def include_file(filename):
     f.close()
     return data
 
-print include_file(MAINFILE)
+print include_file("ddcfg.c")
