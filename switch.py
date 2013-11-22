@@ -157,7 +157,7 @@ def apply_scenarios(filename, parsed, keys, values):
 
         for key, val in zip(keys, pair):
             sec, _, opt = key.partition('.')
-            parsed.set(sec, opt, val)
+            parsed.set(sec, opt, str(val))
 
         parsed.write(open(newfile,'w'))
         parsed.resetdefault()
