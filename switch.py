@@ -67,7 +67,7 @@ def expand_float(field):
         return drange(\
                 decimal.Decimal(tk[0]),
                 decimal.Decimal(tk[1]),
-                decimal.Decimal(1.0))
+                decimal.Decimal('1.0'))
     else:
         return drange(\
                 decimal.Decimal(tk[0]),
