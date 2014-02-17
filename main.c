@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
 	errno = ddcfg_checkdefaults(stderr);
 	if (errno != 0)
-		printf("It seems some options are using default values, be careful!\n");
+		printf("It seems that %d option(s) are using default values, be careful!\n", errno);
 
 	printf("QC.massX [%s] (%lf)\n", ddcfg_get("QC", "massX"), ddcfg_double("QC", "massX"));
 	printf("QC.massY [%s] (%lf)\n", ddcfg_get("QC", "massY"), ddcfg_double("QC", "massY"));

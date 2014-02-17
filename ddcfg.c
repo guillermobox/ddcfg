@@ -6,7 +6,7 @@
 
 static char *errorNotFound = "ddcfg:Error reading %s.%s: not found\n";
 static char *errorNotParse = "ddcfg:Error casting %s.%s to type %s: '%s' not parseable\n";
-static char *errorDefault = "ddcfg:Warning using default value for key: %s=%s\n";
+static char *errorDefault  = "ddcfg:Warning using default value for key: %s=%s\n";
 
 struct nlist default_values[] = {
 	{NULL, "QC.activate", "false"},
@@ -49,17 +49,15 @@ int ddcfg_parse(const char *filename)
 int ddcfg_checkdefaults(FILE *fp)
 {
 	int i, n, unset;
-	struct nlist *pointer;
 
 	n = sizeof(default_values) / sizeof(struct nlist);
 	unset = 0;
-	for (i = 0; i < n; i++ ) {
-		pointer = lookup(default_values[i].key);
-		if (pointer == NULL) {
+	for (i = 0; i < n; i++) {
+		if (lookup(default_values[i].key) == NULL) {
 			if (fp != NULL)
 				fprintf(fp, errorDefault, default_values[i].key, default_values[i].value);
 			install(default_values[i].key, default_values[i].value);
-			unset |= 1;
+			unset += 1;
 		}
 	}
 	return unset;
