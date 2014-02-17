@@ -17,6 +17,10 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	errno = ddcfg_checkdefaults(stderr);
+	if (errno != 0)
+		printf("It seems some options are using default values, be careful!\n");
+
 	printf("QC.massX [%s] (%lf)\n", ddcfg_get("QC", "massX"), ddcfg_double("QC", "massX"));
 	printf("QC.massY [%s] (%lf)\n", ddcfg_get("QC", "massY"), ddcfg_double("QC", "massY"));
 	printf("QC.activate: [%s] (%d)\n", ddcfg_get("QC", "activate"), ddcfg_bool("QC", "activate"));
