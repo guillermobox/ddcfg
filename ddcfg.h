@@ -32,6 +32,8 @@ void ddcfg_dump(const char *header, FILE *fout);
  */
 char *ddcfg_get(const char *section, const char *option);
 
+char** ddcfg_getlist(const char *section, const char *option, int *length);
+
 /* This functions will return a parsed value for the specified section
  * and options.
  */

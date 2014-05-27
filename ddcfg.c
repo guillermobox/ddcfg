@@ -29,7 +29,6 @@ static int handler(void *configuration, const char *section,
 		   const char *option, const char *value)
 {
 	char *newstr;
-
 	if (strlen(section) == 0) {
 		install(option, value);
 	} else {
@@ -151,6 +150,36 @@ int ddcfg_bool(const char *section, const char *option)
 		free(lower);
 		die(section, option, "bool", answer);
 	}
+};
+
+char** ddcfg_getlist(const char *section, const char *option, int *length)
+{
+	char *answer, *answerpt, *element, divisor=',', *chop;
+	char **list;
+	int len;
+
+	list = malloc(1024 * sizeof(char*));
+	len = 0;
+
+	answer = strdup(ddcfg_get(section, option));
+	answerpt = answer;
+
+	while (answerpt) {
+		element = strsep(&answerpt, ",");
+		while (*element == ' ')
+			element++;
+		chop = element;
+		while ((*chop) != '\0') chop++;
+		while ((*(--chop)) == ' ')
+			*chop = '\0';
+		list[len] = strdup(element);
+		len += 1;
+	};
+
+	free(answer);
+
+	*length = len;
+	return list;
 };
 
 void ddcfg_dump(const char *header, FILE *fout){
