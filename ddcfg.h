@@ -41,4 +41,8 @@ int ddcfg_int(const char *section, const char *option);
 int ddcfg_bool(const char *section, const char *option);
 double ddcfg_double(const char *section, const char *option);
 
+/* This function will check the configuration of the database with a spec
+ */
+int ddcfg_check(const char *specfile);
+
 #endif
