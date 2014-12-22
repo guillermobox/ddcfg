@@ -217,3 +217,23 @@ void ddcfg_dump(const char *header, FILE *fout){
 void ddcfg_free(){
 	freeall();
 };
+
+char * ddcfg_is_defined(const char *section, const char *option)
+{
+	struct nlist *search;
+	char *newstr;
+
+	if (section == NULL || strlen(section) == 0) {
+		search = lookup(option);
+	} else {
+		newstr = malloc(strlen(section) + strlen(option) + 2);
+		sprintf(newstr, "%s.%s", section, option);
+		search = lookup(newstr);
+		free(newstr);
+	}
+	if (search)
+		return search->value;
+	else
+		return NULL;
+};
+
