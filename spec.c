@@ -98,7 +98,7 @@ static void set_section(struct st_spec_section *section, char *key, char *value)
 	}
 };
 
-struct st_spec_property * new_property(struct st_spec_section *section)
+static struct st_spec_property * new_property(struct st_spec_section *section)
 {
 	struct st_spec_property * prop;
 	prop = section->properties;
@@ -118,7 +118,7 @@ struct st_spec_property * new_property(struct st_spec_section *section)
 	return prop->next;
 };
 
-struct st_spec_section * new_section(struct st_spec *spec)
+static struct st_spec_section * new_section(struct st_spec *spec)
 {
 	struct st_spec_section * psec;
 
@@ -137,7 +137,7 @@ struct st_spec_section * new_section(struct st_spec *spec)
 	return psec->next;
 };
 
-struct st_spec * new_spec_from_file(char * path)
+static struct st_spec * new_spec_from_file(char * path)
 {
 	struct st_spec * spec;
 	FILE * f;
@@ -173,7 +173,7 @@ struct st_spec * new_spec_from_file(char * path)
 	return spec;
 };
 
-void print_property(struct st_spec_property * prop)
+static void print_property(struct st_spec_property * prop)
 {
 	printf("PROPERTY %s\n", prop->name);
 	printf("\tDESCRIPTION %s\n", prop->description);
@@ -190,7 +190,7 @@ void print_property(struct st_spec_property * prop)
 	printf("\n");
 };
 
-void print_section(struct st_spec_section *section)
+static void print_section(struct st_spec_section *section)
 {
 	struct st_spec_property * prop;
 	if (section->type == PRIMARY)
@@ -206,7 +206,7 @@ void print_section(struct st_spec_section *section)
 	}
 };
 
-void print_spec(struct st_spec *spec)
+static void print_spec(struct st_spec *spec)
 {
 	struct st_spec_section * section;
 	printf("#### BEGIN SPEC ####\n");
@@ -218,7 +218,7 @@ void print_spec(struct st_spec *spec)
 	printf("#### END SPEC ####\n");
 };
 
-int is_section(char *key)
+static int is_section(char *key)
 {
 	int i;
 	for (i = 0; i < sizeof(section_strings) / sizeof(char*); i++) {
@@ -228,14 +228,14 @@ int is_section(char *key)
 	return 0;
 };
 
-int is_property(char *key)
+static int is_property(char *key)
 {
 	if (strcmp(key, "PROPERTY") == 0)
 		return 1;
 	return 0;
 }
 
-int parse_spec(struct st_spec *spec)
+static int parse_spec(struct st_spec *spec)
 {
 	enum parser_status status;
 	struct st_spec_section * section = NULL;
