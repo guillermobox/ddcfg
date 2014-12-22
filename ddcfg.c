@@ -43,7 +43,7 @@ int ddcfg_parse(const char *filename)
 
 int ddcfg_parse_args(int argc, char *argv[])
 {
-	char *key, *value;
+	char *key, *value, *path;
 	int i;
 
 	for (i = 0; i < argc; i++) {
@@ -53,6 +53,12 @@ int ddcfg_parse_args(int argc, char *argv[])
 			key = argv[++i];
 			value = argv[++i];
 			install(key, value);
+		};
+		if (strcmp(argv[i], "--check") == 0) {
+			if (i + 1 >= argc)
+				return -1;
+			path = argv[++i];
+			ddcfg_check(path);
 		};
 	};
 	return 0;
@@ -235,5 +241,126 @@ char * ddcfg_is_defined(const char *section, const char *option)
 		return search->value;
 	else
 		return NULL;
+};
+
+struct st_spec * spec;
+
+static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname);
+
+static int ddcfg_check_subsection(struct st_spec_section *section, const char *secname)
+{
+	struct st_spec_property * property;
+
+	property = section->properties;
+	while (property) {
+		ddcfg_check_property(section, property, secname);
+		property = property->next;
+	};
+};
+
+static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname)
+{
+	const char * value;
+	int err;
+
+	value = ddcfg_is_defined(secname, property->name);
+
+	if (value == NULL) {
+		if (property->defaultvalue) {
+			handler(NULL, secname, property->name, property->defaultvalue);
+			value = property->defaultvalue;
+			printf("Setting default value: %s.%s = %s\n", secname, property->name, property->defaultvalue);
+		}
+		else if (property->depends_on) {
+			struct nlist *search;
+			int boolvalue;
+			search = lookup(property->depends_on);
+			if (search) {
+				err = ddcfg_parse_bool(search->value, &boolvalue);
+				if (err == 0 && boolvalue == 0) return 0;
+			} else {
+				struct st_spec_property * remote;
+				char * remotefull = strdup(property->depends_on);
+				char *remotesec, *remoteprop;
+
+				remotesec = strtok(remotefull, ".");
+				remoteprop = strtok(NULL, ".");
+
+				remote = lookup_property(spec, remotesec, remoteprop);
+				free(remotefull);
+
+				if (remote && remote->defaultvalue) {
+					err = ddcfg_parse_bool(remote->defaultvalue, &boolvalue);
+					if (err == 0 && boolvalue == 0) return 0;
+				}
+				printf("Property required but not set: %s.%s\n", secname, property->name);
+				return 1;
+			}
+		} else {
+			printf("Property not set: %s.%s\n", secname, property->name);
+			return 1;
+		}
+	}
+
+	if (property->type == INT) {
+		int tmp;
+		err = ddcfg_parse_int(value, &tmp);
+		if (err) {
+			printf("The property %s.%s does not parse to int\n", secname, property->name);
+			return 1;
+		}
+	} else if (property->type == DOUBLE) {
+		double tmp;
+		err = ddcfg_parse_double(value, &tmp);
+		if (err) {
+			printf("The property %s.%s does not parse to double\n", secname, property->name);
+			return 1;
+		}
+	} else if (property->type == BOOL) {
+		int tmp;
+		err = ddcfg_parse_bool(value, &tmp);
+		if (err) {
+			printf("The property %s.%s does not parse to bool\n", secname, property->name);
+			return 1;
+		}
+	} else if (property->type == SUBSECTION) {
+		char ** sections;
+		int length, i, err;
+
+		sections = ddcfg_getlist(secname, property->name, &length);
+
+		for (i = 0; i < length; i++) {
+			struct st_spec_section * remote;
+			remote = lookup_section(spec, property->points_to);
+			err = ddcfg_check_subsection(remote, sections[i]);
+		};
+	};
+}
+
+static int ddcfg_check_section(struct st_spec_section *section)
+{
+	struct st_spec_property * property;
+	property = section->properties;
+	while (property) {
+		ddcfg_check_property(section, property, section->name);
+		property = property->next;
+	};
+}
+
+int ddcfg_check(const char *specfile)
+{
+	struct st_spec_section * section;
+	struct st_spec_property * property;
+
+	spec = new_spec_from_file(specfile);
+	parse_spec(spec);
+
+	section = spec->sections;
+	while (section) {
+		if (section->type == PRIMARY)
+			ddcfg_check_section(section);
+		section = section->next;
+	}
+	printf("All clear!\n");
 };
 
