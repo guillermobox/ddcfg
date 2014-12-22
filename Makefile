@@ -1,4 +1,4 @@
-FLAGS=-g
+FLAGS=-g -fno-diagnostics-show-caret
 #FLAGS=-pg #this flag is for profiling
 
 all:
