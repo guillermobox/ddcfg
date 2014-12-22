@@ -1,40 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "spec.h"
 
-enum property_type {STRING = 0, INT, BOOL, DOUBLE, SECTION, SECTIONS};
-char * property_strings[] = {"string", "int", "bool", "double", "section", "sections"};
-
-enum section_type {PRIMARY = 0, SECONDARY};
+char * property_strings[] = {"string", "int", "bool", "double", "subsection"};
 char * section_strings[] = {"SECTION", "SUBSECTION"};
-
-enum parser_status {NONE, ONSECTION, ONPROPERTY};
-
-struct st_spec {
-	struct st_spec_section *sections;
-	unsigned int nsections;
-	char * contents;
-	unsigned int length;
-};
-
-struct st_spec_section {
-	char * name;
-	char * description;
-	enum section_type type;
-	struct st_spec_section * next;
-	struct st_spec_property * properties;
-};
-
-struct st_spec_property {
-	struct st_spec_property * next;
-	char * name;
-	char * description;
-	char * depends_on;
-	char * points_to;
-	char * values;
-	char * defaultvalue;
-	enum property_type type;
-};
 
 #define BUFSIZE 256
 
@@ -127,6 +97,7 @@ static struct st_spec_section * new_section(struct st_spec *spec)
 	if (psec == NULL) {
 		psec = (struct st_spec_section *) malloc(sizeof(struct st_spec_section));
 		spec->sections = psec;
+		bzero(psec, sizeof(struct st_spec_section));
 		return psec;
 	}
 
@@ -134,10 +105,11 @@ static struct st_spec_section * new_section(struct st_spec *spec)
 		psec = psec->next;
 
 	psec->next = (struct st_spec_section *) malloc(sizeof(struct st_spec_section));
+	bzero(psec->next, sizeof(struct st_spec_section));
 	return psec->next;
 };
 
-static struct st_spec * new_spec_from_file(char * path)
+struct st_spec * new_spec_from_file(const char * path)
 {
 	struct st_spec * spec;
 	FILE * f;
@@ -173,7 +145,7 @@ static struct st_spec * new_spec_from_file(char * path)
 	return spec;
 };
 
-static void print_property(struct st_spec_property * prop)
+void print_property(struct st_spec_property * prop)
 {
 	printf("PROPERTY %s\n", prop->name);
 	printf("\tDESCRIPTION %s\n", prop->description);
@@ -235,7 +207,40 @@ static int is_property(char *key)
 	return 0;
 }
 
-static int parse_spec(struct st_spec *spec)
+struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname)
+{
+	struct st_spec_section * section;
+	
+	section = spec->sections;
+	while (section) {
+		if (strcmp(section->name, secname) == 0) {
+			return section;
+		}
+		section = section->next;
+	}
+	return NULL;
+};
+
+struct st_spec_property * lookup_property(struct st_spec *spec, const char *secname, const char *propname)
+{
+	struct st_spec_section * section;
+	struct st_spec_property * property;
+	
+	section = lookup_section(spec, secname);
+	if (section == NULL)
+		return NULL;
+
+	property = section->properties;
+	while (property) {
+		if (strcmp(property->name, propname) == 0) {
+			return property;
+		}
+		property = property->next;
+	}
+	return NULL;
+};
+
+int parse_spec(struct st_spec *spec)
 {
 	enum parser_status status;
 	struct st_spec_section * section = NULL;
@@ -278,16 +283,6 @@ static int parse_spec(struct st_spec *spec)
 			exit(1);
 		}
 	}
+
+	fclose(stream);
 }
-
-int main(int argc, char * argv[])
-{
-	struct st_spec * spec;
-
-	spec = new_spec_from_file("configuration.spec");
-	parse_spec(spec);
-
-	print_spec(spec);
-
-	return 0;
-};
