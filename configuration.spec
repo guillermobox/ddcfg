@@ -27,6 +27,8 @@ OPTION Machine.bits
 	TYPE int
 	DEPENDS_ON Machine.changebits
 	DESCRIPTION Bit size of the system to simulate
+	the behaviour of the system if you have changed the
+	bit type of the processor. You can use 16 or 32.
 
 OPTION Machine.changebits
 	TYPE bool
