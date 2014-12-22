@@ -76,39 +76,58 @@ char *ddcfg_get(const char *section, const char *option)
 	return search->value;
 };
 
+static int ddcfg_parse_double(const char *string, double *value)
+{
+	char *ptr;
+	ptr = (char *) string;
+	*value = strtod(string, &ptr);
+	if (ptr == string)
+		return 1;
+	return 0;
+};
+
 double ddcfg_double(const char *section, const char *option)
 {
 	char *answer, *ptr;
 	double number;
+	int err;
 
 	answer = ddcfg_get(section, option);
-	ptr = answer;
-	number = strtod(answer, &ptr);
-	if (ptr == answer)
+	err = ddcfg_parse_double(answer, &number);
+	if (err)
 		die(section, option, "double", answer);
 	return number;
+};
+
+static int ddcfg_parse_int(const char *string, int *value)
+{
+	char *ptr;
+	ptr = (char *) string;
+	*value = (int) strtol(string, &ptr, 10);
+	if (ptr == string || *ptr != '\0')
+		return 1;
+	return 0;
 };
 
 int ddcfg_int(const char *section, const char *option)
 {
 	char *answer, *ptr;
 	int number;
+	int err;
 
 	answer = ddcfg_get(section, option);
-	ptr = answer;
-	number = (int) strtol(answer, &ptr, 10);
-	if (ptr == answer)
+	err = ddcfg_parse_int(answer, &number);
+	if (err)
 		die(section, option, "int", answer);
 	return number;
 };
 
-int ddcfg_bool(const char *section, const char *option)
+static int ddcfg_parse_bool(const char *string, int *value)
 {
-	char *answer, *lower;
+	char *lower;
 	int i;
 
-	answer = ddcfg_get(section, option);
-	lower = strdup(answer);
+	lower = strdup(string);
 	for (i = 0; i < strlen(lower); i++) {
 		if (lower[i] >= 'A' && lower[i] <= 'Z')
 			lower[i] += 32;
@@ -117,18 +136,33 @@ int ddcfg_bool(const char *section, const char *option)
 			strcmp(lower, "on") == 0 ||
 			strcmp(lower, "yes") == 0 ||
 			strcmp(lower, "1") == 0) {
-		free(lower);
-		return 1;
+		*value = 1;
 	}else if (strcmp(lower, "false") == 0 ||
 			strcmp(lower, "off") == 0 ||
 			strcmp(lower, "no") == 0 ||
 			strcmp(lower, "0") == 0) {
+		*value = 0;
+	} else {
 		free(lower);
-		return 0;
-	}else{
-		free(lower);
-		die(section, option, "bool", answer);
+		return 1;
 	}
+
+	free(lower);
+	return 0;
+};
+
+int ddcfg_bool(const char *section, const char *option)
+{
+	char *answer;
+	int value, err;
+
+	answer = ddcfg_get(section, option);
+	err = ddcfg_parse_bool(answer, &value);
+
+	if (err)
+		die(section, option, "bool", answer);
+
+	return value;
 };
 
 char** ddcfg_getlist(const char *section, const char *option, int *length)
