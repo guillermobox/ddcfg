@@ -38,7 +38,14 @@ static int handler(void *configuration, const char *section,
 
 int ddcfg_parse(const char *filename)
 {
-	return ini_parse(filename, handler, NULL);
+	FILE *f;
+	int error;
+	f = fopen(filename, "r");
+	if (f == NULL)
+		return -1;
+	error = ini_parse_file(f, handler, NULL);
+	fclose(f);
+	return error;
 };
 
 int ddcfg_parse_args(int argc, char *argv[])
