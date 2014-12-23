@@ -180,7 +180,7 @@ char ** ddcfg_parselist(const char *string, int *length)
 	list = malloc(1024 * sizeof(char*));
 	len = 0;
 
-	ptr = string;
+	ptr = (char *) string;
 	while (ptr) {
 		element = strsep(&ptr, ",");
 		while (*element == ' ')
@@ -278,33 +278,31 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 			handler(NULL, secname, property->name, property->defaultvalue);
 			value = property->defaultvalue;
 			printf("Setting default value: %s.%s = %s\n", secname, property->name, property->defaultvalue);
-		}
-		else if (property->depends_on) {
-			struct nlist *search;
-			int boolvalue;
-			search = lookup(property->depends_on);
-			if (search) {
-				err = ddcfg_parse_bool(search->value, &boolvalue);
-				if (err == 0 && boolvalue == 0) return 0;
-			} else {
-				struct st_spec_property * remote;
-				char * remotefull = strdup(property->depends_on);
-				char *remotesec, *remoteprop;
-
-				remotesec = strtok(remotefull, ".");
-				remoteprop = strtok(NULL, ".");
-
-				remote = lookup_property(spec, remotesec, remoteprop);
-				free(remotefull);
-
-				if (remote && remote->defaultvalue) {
-					err = ddcfg_parse_bool(remote->defaultvalue, &boolvalue);
-					if (err == 0 && boolvalue == 0) return 0;
-				}
-				printf("Property required but not set: %s.%s\n", secname, property->name);
-				return 1;
-			}
 		} else {
+			if (property->depends_on) {
+				struct nlist *search;
+				int boolvalue;
+				search = lookup(property->depends_on);
+				if (search) {
+					err = ddcfg_parse_bool(search->value, &boolvalue);
+					if (err == 0 && boolvalue == 0) return 0;
+				} else {
+					struct st_spec_property * remote;
+					char * remotefull = strdup(property->depends_on);
+					char *remotesec, *remoteprop;
+
+					remotesec = strtok(remotefull, ".");
+					remoteprop = strtok(NULL, ".");
+
+					remote = lookup_property(spec, remotesec, remoteprop);
+					free(remotefull);
+
+					if (remote && remote->defaultvalue) {
+						err = ddcfg_parse_bool(remote->defaultvalue, &boolvalue);
+						if (err == 0 && boolvalue == 0) return 0;
+					}
+				}
+			}
 			printf("Property not set: %s.%s\n", secname, property->name);
 			return 1;
 		}
@@ -342,7 +340,26 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 			remote = lookup_section(spec, property->points_to);
 			err = ddcfg_check_subsection(remote, sections[i]);
 		};
+		return 0;
 	};
+
+	if (property->values) {
+		char ** possible_values;
+		int i, number_values;
+
+		possible_values = ddcfg_parselist(property->values, &number_values);
+
+		for (i = 0; i < number_values; i++) {
+			if (strcmp(possible_values[i], value) == 0)
+				break;
+		};
+
+		if (i == number_values) {
+			printf("Value not equal to desired value list in %s.%s\n", secname, property->name);
+			return 1;
+		}
+	};
+	return 0;
 }
 
 static int ddcfg_check_section(struct st_spec_section *section)

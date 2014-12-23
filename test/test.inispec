@@ -25,6 +25,7 @@ PROPERTY endianness
 
 PROPERTY bits
 	TYPE int
+	VALUES 16, 32
 	DEPENDS_ON Machine.changebits
 	DESCRIPTION Bit size of the system to simulate
 	DESCRIPTION the behaviour of the system if you have changed the
