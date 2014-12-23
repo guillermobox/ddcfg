@@ -282,6 +282,11 @@ struct st_spec_property * lookup_property(struct st_spec *spec, const char *secn
 	return NULL;
 };
 
+void dump_spec(struct st_spec *spec)
+{
+	printf(spec->contents);
+};
+	
 int parse_spec(struct st_spec *spec)
 {
 	enum parser_status status;

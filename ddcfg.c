@@ -8,6 +8,7 @@
 
 static char *errorNotFound = "ddcfg:Error reading %s.%s: not found\n";
 static char *errorNotParse = "ddcfg:Error casting %s.%s to type %s: '%s' not parseable\n";
+static struct st_spec * spec = NULL;
 
 static void die(const char *section, const char *option, const char *cast,
 		const char *value)
@@ -55,6 +56,12 @@ int ddcfg_parse(const char *filename)
 	return error;
 };
 
+void ddcfg_dump_spec()
+{
+	if (spec != NULL)
+		dump_spec(spec);
+};
+
 int ddcfg_parse_args(int argc, char *argv[])
 {
 	char *key, *value, *path;
@@ -67,12 +74,15 @@ int ddcfg_parse_args(int argc, char *argv[])
 			key = argv[++i];
 			value = argv[++i];
 			install(key, value);
-		};
-		if (strcmp(argv[i], "--check") == 0) {
+		}
+		else if (strcmp(argv[i], "--check") == 0) {
 			if (i + 1 >= argc)
 				return -1;
 			path = argv[++i];
 			ddcfg_check(path);
+		}
+		else if (strcmp(argv[i], "--spec") == 0) {
+			ddcfg_dump_spec();
 		};
 	};
 	return 0;
@@ -265,7 +275,6 @@ char * ddcfg_is_defined(const char *section, const char *option)
 		return NULL;
 };
 
-struct st_spec * spec;
 
 static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname);
 
@@ -455,7 +464,6 @@ int ddcfg_check(const char *specfile)
 	}
 
 	err += checked_list(NULL, NULL);
-	delete_spec(spec);
 
 	return err;
 };
