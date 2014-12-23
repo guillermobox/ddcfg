@@ -258,12 +258,14 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 static int ddcfg_check_subsection(struct st_spec_section *section, const char *secname)
 {
 	struct st_spec_property * property;
+	int err = 0;
 
 	property = section->properties;
 	while (property) {
-		ddcfg_check_property(section, property, secname);
+		err += ddcfg_check_property(section, property, secname);
 		property = property->next;
 	};
+	return err;
 };
 
 static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname)
@@ -331,7 +333,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 		}
 	} else if (property->type == SUBSECTION) {
 		char ** sections;
-		int length, i, err;
+		int length, i, err = 0;
 
 		sections = ddcfg_getlist(secname, property->name, &length);
 
@@ -340,7 +342,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 			remote = lookup_section(spec, property->points_to);
 			err = ddcfg_check_subsection(remote, sections[i]);
 		};
-		return 0;
+		return err;
 	};
 
 	if (property->values) {
@@ -365,17 +367,21 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 static int ddcfg_check_section(struct st_spec_section *section)
 {
 	struct st_spec_property * property;
+	int err = 0;
+
 	property = section->properties;
 	while (property) {
-		ddcfg_check_property(section, property, section->name);
+		err += ddcfg_check_property(section, property, section->name);
 		property = property->next;
 	};
+	return err;
 }
 
 int ddcfg_check(const char *specfile)
 {
 	struct st_spec_section * section;
 	struct st_spec_property * property;
+	int err = 0;
 
 	spec = new_spec_from_file(specfile);
 	parse_spec(spec);
@@ -383,9 +389,15 @@ int ddcfg_check(const char *specfile)
 	section = spec->sections;
 	while (section) {
 		if (section->type == PRIMARY)
-			ddcfg_check_section(section);
+			err += ddcfg_check_section(section);
 		section = section->next;
 	}
-	printf("All clear!\n");
+
+	if (err)
+		printf("Found %d errors!\n", err);
+	else
+		printf("All clear!\n");
+
+	return err;
 };
 
