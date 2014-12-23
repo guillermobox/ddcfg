@@ -77,6 +77,7 @@ static struct st_spec_property * new_property(struct st_spec_section *section)
 		section->properties = (struct st_spec_property *) malloc(sizeof(struct st_spec_property));
 		prop = section->properties;
 		bzero(prop, sizeof(struct st_spec_property));
+		prop->section = section;
 		return prop;
 	};
 
@@ -85,6 +86,7 @@ static struct st_spec_property * new_property(struct st_spec_section *section)
 
 	prop->next = (struct st_spec_property *) malloc(sizeof(struct st_spec_property));
 	bzero(prop->next, sizeof(struct st_spec_property));
+	prop->next->section = section;
 	return prop->next;
 };
 
@@ -98,6 +100,7 @@ static struct st_spec_section * new_section(struct st_spec *spec)
 		psec = (struct st_spec_section *) malloc(sizeof(struct st_spec_section));
 		spec->sections = psec;
 		bzero(psec, sizeof(struct st_spec_section));
+		psec->spec = spec;
 		return psec;
 	}
 
@@ -106,7 +109,18 @@ static struct st_spec_section * new_section(struct st_spec *spec)
 
 	psec->next = (struct st_spec_section *) malloc(sizeof(struct st_spec_section));
 	bzero(psec->next, sizeof(struct st_spec_section));
+	psec->next->spec = spec;
 	return psec->next;
+};
+
+struct st_spec * new_spec_from_data(const char * data, int length)
+{
+	struct st_spec * spec;
+	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
+	spec->sections = NULL;
+	spec->contents = data;
+	spec->length = length;
+	return spec;
 };
 
 struct st_spec * new_spec_from_file(const char * path)
@@ -145,7 +159,7 @@ struct st_spec * new_spec_from_file(const char * path)
 	return spec;
 };
 
-void print_property(struct st_spec_property * prop)
+static void print_property(struct st_spec_property * prop)
 {
 	printf("PROPERTY %s\n", prop->name);
 	printf("\tDESCRIPTION %s\n", prop->description);
