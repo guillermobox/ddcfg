@@ -14,6 +14,7 @@ struct st_spec {
 struct st_spec_section {
 	char * name;
 	char * description;
+	int specline;
 	enum section_type type;
 	struct st_spec * spec;
 	struct st_spec_section * next;
@@ -27,6 +28,7 @@ struct st_spec_property {
 	char * points_to;
 	char * values;
 	char * defaultvalue;
+	int specline;
 	enum property_type type;
 	struct st_spec_property * next;
 	struct st_spec_section * section;

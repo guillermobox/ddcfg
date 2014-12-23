@@ -261,12 +261,15 @@ int parse_spec(struct st_spec *spec)
 	struct st_spec_section * section = NULL;
 	struct st_spec_property * prop = NULL;
 	char line[BUFSIZE], *p, *key, *value;
+	int linecount;
 	FILE * stream;
 
 	status = NONE;
+	linecount = 0;
 	stream = fmemopen(spec->contents, spec->length, "r");
 
 	while (fgets(line, BUFSIZE, stream)) {
+		linecount ++;
 		p = line;
 		while (*p && isblank(*p)) p++;
 		if (*p == '#' || *p == '\n')
@@ -279,11 +282,13 @@ int parse_spec(struct st_spec *spec)
 			section = new_section(spec);
 			set_section(section, "TYPE", key);
 			set_section(section, "NAME", value);
+			section->specline = linecount;
 			status = ONSECTION;
 			continue;
 		} else if (is_property(key)) {
 			prop = new_property(section);
 			set_property(prop, "NAME", value);
+			prop->specline = linecount;
 			status = ONPROPERTY;
 			continue;
 		};
