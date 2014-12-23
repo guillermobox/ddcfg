@@ -158,6 +158,35 @@ struct st_spec * new_spec_from_file(const char * path)
 	return spec;
 };
 
+static void delete_property(struct st_spec_property *prop)
+{
+	if (prop->name) free(prop->name);
+	if (prop->description) free(prop->description);
+	if (prop->depends_on) free(prop->depends_on);
+	if (prop->points_to) free(prop->points_to);
+	if (prop->values) free(prop->values);
+	if (prop->defaultvalue) free(prop->defaultvalue);
+	if (prop->next) delete_property(prop->next);
+	free(prop);
+};
+
+static void delete_section(struct st_spec_section * sec)
+{
+	if (sec->name) free(sec->name);
+	if (sec->description) free(sec->description);
+	if (sec->properties)
+		delete_property(sec->properties);
+	if (sec->next) delete_section(sec->next);
+	free(sec);
+};
+
+void delete_spec(struct st_spec * spec)
+{
+	if (spec->contents) free(spec->contents);
+	delete_section(spec->sections);
+	free(spec);
+};
+
 static void print_property(struct st_spec_property * prop)
 {
 	printf("PROPERTY %s\n", prop->name);

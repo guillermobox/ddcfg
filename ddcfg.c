@@ -446,6 +446,7 @@ int ddcfg_check(const char *specfile)
 	}
 
 	err += checked_list(NULL, NULL);
+	delete_spec(spec);
 
 	return err;
 };

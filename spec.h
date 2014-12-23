@@ -36,6 +36,7 @@ struct st_spec_property {
 
 int parse_spec(struct st_spec *spec);
 void print_spec(struct st_spec *spec, const char * header);
+void delete_spec(struct st_spec * spec);
 struct st_spec * new_spec_from_file(const char * path);
 struct st_spec * new_spec_from_data(const char * data, int length);
 struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname);
