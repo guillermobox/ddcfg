@@ -81,8 +81,6 @@ char **getall(void){
 void freeall(void){
 	struct nlist *np, *next;
 	int i;
-	char **items;
-	char buffer[128];
 
 	for (i = 0; i < HASHSIZE; i++) {
 		np = hashtab[i];

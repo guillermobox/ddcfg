@@ -9,7 +9,7 @@
 /* Parse a file to the dictionary of key/value pairs. Call this
  * before any other call, otherwise they will return error.
  */
-int ddcfg_parse(char *filename);
+int ddcfg_parse(const char *filename);
 
 /* Parse the arguments from the command line, call it after cfg_parse to
  * mantain the priority of the command line arguments over the configuration

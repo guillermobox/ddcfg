@@ -4,10 +4,10 @@
 #include "hash.h"
 #include "ini.h"
 #include "spec.h"
+#include "ddcfg.h"
 
 static char *errorNotFound = "ddcfg:Error reading %s.%s: not found\n";
 static char *errorNotParse = "ddcfg:Error casting %s.%s to type %s: '%s' not parseable\n";
-static char *errorDefault  = "ddcfg:Warning using default value for key: %s=%s\n";
 
 static void die(const char *section, const char *option, const char *cast,
 		const char *value)
@@ -94,7 +94,7 @@ static int ddcfg_parse_double(const char *string, double *value)
 
 double ddcfg_double(const char *section, const char *option)
 {
-	char *answer, *ptr;
+	char *answer;
 	double number;
 	int err;
 
@@ -117,7 +117,7 @@ static int ddcfg_parse_int(const char *string, int *value)
 
 int ddcfg_int(const char *section, const char *option)
 {
-	char *answer, *ptr;
+	char *answer;
 	int number;
 	int err;
 
@@ -380,7 +380,6 @@ static int ddcfg_check_section(struct st_spec_section *section)
 int ddcfg_check(const char *specfile)
 {
 	struct st_spec_section * section;
-	struct st_spec_property * property;
 	int err = 0;
 
 	spec = new_spec_from_file(specfile);

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "spec.h"
 
 char * property_strings[] = {"string", "int", "bool", "double", "subsection"};
@@ -118,7 +119,7 @@ struct st_spec * new_spec_from_data(const char * data, int length)
 	struct st_spec * spec;
 	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
 	spec->sections = NULL;
-	spec->contents = data;
+	spec->contents = (char *) data;
 	spec->length = length;
 	return spec;
 };
@@ -192,16 +193,16 @@ static void print_section(struct st_spec_section *section)
 	}
 };
 
-static void print_spec(struct st_spec *spec)
+void print_spec(struct st_spec *spec, const char * header)
 {
 	struct st_spec_section * section;
-	printf("#### BEGIN SPEC ####\n");
+	printf("%s\n", header);
 	section = spec->sections;
 	while (section) {
 		print_section(section);
 		section = section->next;
 	}
-	printf("#### END SPEC ####\n");
+	printf("%s\n", header);
 };
 
 static int is_section(char *key)
@@ -261,7 +262,6 @@ int parse_spec(struct st_spec *spec)
 	struct st_spec_property * prop = NULL;
 	char line[BUFSIZE], *p, *key, *value;
 	FILE * stream;
-	int index;
 
 	status = NONE;
 	stream = fmemopen(spec->contents, spec->length, "r");
@@ -299,4 +299,5 @@ int parse_spec(struct st_spec *spec)
 	}
 
 	fclose(stream);
+	return 0;
 }
