@@ -1,8 +1,5 @@
 /*
- * Modification of the source to be used in cfg.
- *
- * - The comment character now is '#' instead of ';'
- * - Changed the formatting of some sentences
+ * Modified ini parser.
  *
  * Original disclaimer:
 -----------------8<---------------
@@ -13,7 +10,6 @@
  *
  * http://code.google.com/p/inih/
 -----------------8<---------------
- *
  */
 
 #include <stdio.h>
@@ -24,6 +20,7 @@
 
 #define MAX_SECTION 50
 #define MAX_NAME 50
+#define INI_MAX_LINE 200
 
 /* Strip whitespace chars off end of given string, in place. Return s. */
 static char *rstrip(char *s)
@@ -80,28 +77,11 @@ int ini_parse_file(FILE * file,
 		lineno++;
 		start = line;
 
-#if INI_ALLOW_BOM
-		if (lineno == 1 && (unsigned char) start[0] == 0xEF
-		    && (unsigned char) start[1] == 0xBB
-		    && (unsigned char) start[2] == 0xBF) {
-			start += 3;
-		}
-#endif
 		start = lskip(rstrip(start));
 		if (*start == '#') {
 
 			/* Per Python ConfigParser, allow '#' comments at start of line */
 		}
-#if INI_ALLOW_MULTILINE
-		else if (*prev_name && *start && start > line) {
-
-			/* Non-black line with leading whitespace, treat as continuation
-			   of previous name's value (as per Python ConfigParser). */
-			if (!handler(user, section, prev_name, start)
-			    && !error)
-				error = lineno;
-		}
-#endif				/*  */
 		else if (*start == '[') {
 
 			/* A "[section]" line */
