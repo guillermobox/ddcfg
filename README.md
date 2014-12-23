@@ -68,3 +68,18 @@ possible values. Also, the variable Machine.bits has to be an integer, and
 is only required if the variable Machine.changebits is set to true. The default
 behaviour is to be false, so none of those properties are needed.
 
+So, in this case, this configuration is valid:
+
+    [Machine]
+    endianness = little
+
+The variable Machine.changebits will have the default value of false, and the
+Machine.bits will not be defined. But this configuration fails:
+
+    [Machine]
+    endianness = top
+    changebits = true
+
+For two reasons: the endianness doesn't have the right value, and the changebits
+variable is true, which means the Machine.bits property is required.
+
