@@ -432,7 +432,11 @@ int ddcfg_check(const char *specfile)
 	int err = 0;
 
 	spec = new_spec_from_file(specfile);
-	parse_spec(spec);
+	err = parse_spec(spec);
+	
+	if (err) {
+		return -err;
+	}
 
 	section = spec->sections;
 	while (section) {
@@ -442,11 +446,6 @@ int ddcfg_check(const char *specfile)
 	}
 
 	err += checked_list(NULL, NULL);
-
-	if (err)
-		printf("Found %d errors!\n", err);
-	else
-		printf("All clear!\n");
 
 	return err;
 };

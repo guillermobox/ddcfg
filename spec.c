@@ -9,7 +9,7 @@ char * section_strings[] = {"SECTION", "SUBSECTION"};
 
 #define BUFSIZE 256
 
-static void set_property(struct st_spec_property *prop, char *key, char *value)
+static int set_property(struct st_spec_property *prop, char *key, char *value)
 {
 	if (strcmp(key, "NAME") == 0) {
 		prop->name = strdup(value);
@@ -39,11 +39,12 @@ static void set_property(struct st_spec_property *prop, char *key, char *value)
 	} else if (strcmp(key, "VALUES") == 0) {
 		prop->values = strdup(value);
 	} else {
-		printf("Wop, key not found! <%s>\n", key);
+		return 1;
 	}
+	return 0;
 };
 
-static void set_section(struct st_spec_section *section, char *key, char *value)
+static int set_section(struct st_spec_section *section, char *key, char *value)
 {
 	if (strcmp(key, "NAME") == 0) {
 		section->name = strdup(value);
@@ -65,8 +66,9 @@ static void set_section(struct st_spec_section *section, char *key, char *value)
 			}
 		};
 	} else {
-		printf("Wop, key not found! <%s>\n", key);
+		return 1;
 	}
+	return 0;
 };
 
 static struct st_spec_property * new_property(struct st_spec_section *section)
@@ -137,20 +139,16 @@ struct st_spec * new_spec_from_file(const char * path)
 	f = fopen(path, "r");
 
 	if (f == NULL) {
-		printf("Impossible to open \"%s\" for reading\n", path);
-		exit(1);
+		return NULL;
 	}
 
 	contents = calloc(1024 * 1024, sizeof(char));
 
 	filesize = fread(contents, sizeof(char), 1024 * 1024, f);
 
-	if (filesize == 1024 * 1024) {
-		printf("Max length of spec file reached!\n");
-		exit(1);
-	} else if (filesize == 0) {
-		printf("Impossible to read spec file, or empty\n");
-		exit(1);
+	if (filesize == 1024 * 1024 || filesize == 0) {
+		free(contents);
+		return NULL;
 	}
 	fclose(f);
 
@@ -261,15 +259,15 @@ int parse_spec(struct st_spec *spec)
 	struct st_spec_section * section = NULL;
 	struct st_spec_property * prop = NULL;
 	char line[BUFSIZE], *p, *key, *value;
-	int linecount;
+	int lineno;
 	FILE * stream;
 
 	status = NONE;
-	linecount = 0;
+	lineno = 0;
 	stream = fmemopen(spec->contents, spec->length, "r");
 
 	while (fgets(line, BUFSIZE, stream)) {
-		linecount ++;
+		lineno++;
 		p = line;
 		while (*p && isblank(*p)) p++;
 		if (*p == '#' || *p == '\n')
@@ -280,26 +278,25 @@ int parse_spec(struct st_spec *spec)
 
 		if (is_section(key)) {
 			section = new_section(spec);
-			set_section(section, "TYPE", key);
-			set_section(section, "NAME", value);
-			section->specline = linecount;
+			if (set_section(section, "TYPE", key)) return lineno;
+			if (set_section(section, "NAME", value)) return lineno;
+			section->specline = lineno;
 			status = ONSECTION;
 			continue;
 		} else if (is_property(key)) {
 			prop = new_property(section);
-			set_property(prop, "NAME", value);
-			prop->specline = linecount;
+			if (set_property(prop, "NAME", value)) return lineno;
+			prop->specline = lineno;
 			status = ONPROPERTY;
 			continue;
 		};
 
-		if (status == ONPROPERTY)
-			set_property(prop, key, value);
-		else if (status == ONSECTION)
-			set_section(section, key, value);
-		else {
-			printf("Found key-value outside section or property!\n");
-			exit(1);
+		if (status == ONPROPERTY) {
+			if (set_property(prop, key, value)) return lineno;
+		} else if (status == ONSECTION) {
+			if (set_section(section, key, value)) return lineno;
+		} else {
+			return lineno;
 		}
 	}
 
