@@ -52,6 +52,29 @@ static int strcomp(const void *p1, const void *p2)
 	return strcmp(* (char * const *) p1, * (char * const *) p2);
 }
 
+char **all_items(void)
+{
+	struct nlist *np;
+	int i, iitem;
+	char **items;
+
+	iitem = 0;
+	items = malloc(1024 * sizeof(char*));
+	for (i = 0; i < 1024; i++)
+		items[i] = NULL;
+
+	for (i = 0; i < HASHSIZE; i++) {
+		np = hashtab[i];
+		while (np != NULL) {
+			items[iitem++] = np->key;
+			np = np->next;
+		}
+	}
+
+	qsort(items, iitem, sizeof(char*), strcomp);
+	return items;
+};
+
 /* get all the keys/values in a string */
 char **getall(void){
 	struct nlist *np;
