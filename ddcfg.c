@@ -21,6 +21,15 @@ static void die(const char *section, const char *option, const char *cast,
 	exit(EXIT_FAILURE);
 }
 
+static void spec_error(const char *errormsg, struct st_spec_property *prop)
+{
+	if (prop == NULL)
+		fprintf(stderr, "spec:???:%s\n", errormsg);
+	else
+		fprintf(stderr, "spec:%d:%s.%s:%s\n", prop->specline,
+			prop->section->name, prop->name, errormsg);
+};
+
 static int handler(void *configuration, const char *section,
 		   const char *option, const char *value)
 {
@@ -287,7 +296,7 @@ static int checked_list(const char * section, const char * property)
 			};
 
 			if (found == 0) {
-				printf("Key not covered by the spec: %s\n", *item);
+				fprintf(stderr, "spec:??:%s:Property not found in spec\n", *item);
 				errors += 1;
 			};
 
@@ -328,7 +337,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 		if (property->defaultvalue) {
 			handler(NULL, secname, property->name, property->defaultvalue);
 			value = property->defaultvalue;
-			printf("Setting default value: %s.%s = %s\n", secname, property->name, property->defaultvalue);
+			spec_error("Using default value", property);
 		} else {
 			if (property->depends_on) {
 				struct nlist *search;
@@ -354,7 +363,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 					}
 				}
 			}
-			printf("Property not set: %s.%s\n", secname, property->name);
+			spec_error("Property not found", property);
 			return 1;
 		}
 	}
@@ -363,21 +372,21 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 		int tmp;
 		err = ddcfg_parse_int(value, &tmp);
 		if (err) {
-			printf("The property %s.%s does not parse to int\n", secname, property->name);
+			spec_error("Property does not parse to int", property);
 			return 1;
 		}
 	} else if (property->type == DOUBLE) {
 		double tmp;
 		err = ddcfg_parse_double(value, &tmp);
 		if (err) {
-			printf("The property %s.%s does not parse to double\n", secname, property->name);
+			spec_error("Property does not parse to double", property);
 			return 1;
 		}
 	} else if (property->type == BOOL) {
 		int tmp;
 		err = ddcfg_parse_bool(value, &tmp);
 		if (err) {
-			printf("The property %s.%s does not parse to bool\n", secname, property->name);
+			spec_error("Property does not parse to bool", property);
 			return 1;
 		}
 	} else if (property->type == SUBSECTION) {
@@ -406,7 +415,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 		};
 
 		if (i == number_values) {
-			printf("Value not equal to desired value list in %s.%s\n", secname, property->name);
+			spec_error("Property does not match with value list", property);
 			return 1;
 		}
 	};
