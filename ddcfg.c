@@ -171,20 +171,18 @@ int ddcfg_bool(const char *section, const char *option)
 	return value;
 };
 
-char** ddcfg_getlist(const char *section, const char *option, int *length)
+char ** ddcfg_parselist(const char *string, int *length)
 {
-	char *answer, *answerpt, *element, divisor=',', *chop;
-	char **list;
+	char *ptr, *element, *chop;
+	char ** list;
 	int len;
 
 	list = malloc(1024 * sizeof(char*));
 	len = 0;
 
-	answer = strdup(ddcfg_get(section, option));
-	answerpt = answer;
-
-	while (answerpt) {
-		element = strsep(&answerpt, ",");
+	ptr = string;
+	while (ptr) {
+		element = strsep(&ptr, ",");
 		while (*element == ' ')
 			element++;
 		chop = element;
@@ -195,9 +193,19 @@ char** ddcfg_getlist(const char *section, const char *option, int *length)
 		len += 1;
 	};
 
+	*length = len;
+	return list;
+};
+
+char** ddcfg_getlist(const char *section, const char *option, int *length)
+{
+	char *answer;
+	char **list;
+
+	answer = strdup(ddcfg_get(section, option));
+	list = ddcfg_parselist(answer, length);
 	free(answer);
 
-	*length = len;
 	return list;
 };
 
