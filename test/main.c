@@ -17,8 +17,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	ddcfg_dump("# CONFIGURATION", stdout);
-
 	ddcfg_free();
 
 	return EXIT_SUCCESS;

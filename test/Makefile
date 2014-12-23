@@ -14,5 +14,5 @@ test: main
 	./main configuration_pass.cfg --check test.inispec
 	@echo
 
-main: ../ddcfg.a
+main: ../ddcfg.a main.c
 	$(CC) main.c ../ddcfg.a -o main
