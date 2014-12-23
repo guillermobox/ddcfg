@@ -32,24 +32,25 @@ PROPERTY bits
 
 PROPERTY changebits
 	TYPE bool
-	DEFAULT false
+	DEFAULT true
 	DESCRIPTION Activate this to change the device bits
 
 PROPERTY modules
-	TYPE sections
+	TYPE subsection
 	POINTS_TO Module
 	DESCRIPTION List of modules to be loaded
 
 SUBSECTION Module
 	DESCRIPTION Module to be used
 
-PROPERTY Module.name
+PROPERTY name
 	DESCRIPTION Name of the module, user friendly
 
-PROPERTY Module.activate
+PROPERTY activate
 	TYPE bool
 	DESCRIPTION Activate the module when loading the program
 
-PROPERTY Module.port
+PROPERTY port
 	TYPE int
+	DEFAULT 22
 	DESCRIPTION Port to acces to module once loaded
