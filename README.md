@@ -43,4 +43,28 @@ can be found:
   - A property is found, but the content is not valid
   - A property is found that is not defined in the spec
 
+An example of specification is this:
+
+    SECTION Machine
+    	DESCRIPTION Information about the Machine to be used with the compiler
+    PROPERTY endianness
+    	TYPE string
+    	DEFAULT little
+    	VALUES little, big
+    	DESCRIPTION Endianness of the input file
+    PROPERTY bits
+    	TYPE int
+    	DEPENDS_ON Machine.changebits
+    	DESCRIPTION Bit size of the system to simulate
+    	DESCRIPTION the behaviour of the system if you have changed the
+    	DESCRIPTION bit type of the processor. You can use 16 or 32.
+    PROPERTY changebits
+    	TYPE bool
+    	DEFAULT false
+    	DESCRIPTION Activate this to change the device bits
+
+In that specification, a property Machine.endianness is defined to have only two
+possible values. Also, the variable Machine.bits has to be an integer, and
+is only required if the variable Machine.changebits is set to true. The default
+behaviour is to be false, so none of those properties are needed.
 
