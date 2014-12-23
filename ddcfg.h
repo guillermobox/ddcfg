@@ -27,6 +27,10 @@ void ddcfg_free();
  */
 void ddcfg_dump(const char *header, FILE *fout);
 
+/* This function checks if a certain section.option is defined
+ */
+char * ddcfg_is_defined(const char *section, const char *option);
+
 /* This function will return a pointer to a string of the specified
  * section and options. No parsing is done.
  */
