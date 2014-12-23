@@ -4,3 +4,4 @@
 *.elf
 tags
 *.a
+main
