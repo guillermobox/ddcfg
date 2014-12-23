@@ -25,15 +25,13 @@ static int handler(void *configuration, const char *section,
 		   const char *option, const char *value)
 {
 	char *newstr;
-	if (strlen(section) == 0) {
-		install(option, value);
-	} else {
-		newstr = malloc(strlen(section) + strlen(option) + 2);
-		sprintf(newstr, "%s.%s", section, option);
-		install(newstr, value);
-		free(newstr);
-	}
-	return 1; /* inih needs a non-zero return on success (???) */
+	if (strlen(section) == 0)
+		return 1;
+	newstr = malloc(strlen(section) + strlen(option) + 2);
+	sprintf(newstr, "%s.%s", section, option);
+	install(newstr, value);
+	free(newstr);
+	return 0;
 };
 
 int ddcfg_parse(const char *filename)

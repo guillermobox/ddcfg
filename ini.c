@@ -40,6 +40,7 @@ static char *lskip(const char *s)
 	return (char *) s;
 }
 
+/* Return a pointer to the first comment or given char in the string. */
 static char *find_char_or_comment(const char *s, char c)
 {
 	int was_whitespace = 0;
@@ -80,8 +81,7 @@ int ini_parse_file(FILE * file,
 			end = find_char_or_comment(start + 1, ']');
 			if (*end == ']') {
 				*end = '\0';
-				strncpy0(section, start + 1,
-					 sizeof(section));
+				strncpy0(section, start + 1, sizeof(section));
 				*prev_name = '\0';
 			}
 
@@ -105,10 +105,9 @@ int ini_parse_file(FILE * file,
 					*end = '\0';
 				rstrip(value);
 
-				strncpy0(prev_name, name,
-					 sizeof(prev_name));
-				if (!handler(user, section, name, value)
-				    && !error)
+				strncpy0(prev_name, name, sizeof(prev_name));
+
+				if (handler(user, section, name, value) && !error)
 					error = lineno;
 			}
 
