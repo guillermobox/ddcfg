@@ -12,9 +12,13 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	if (ddcfg_parse_args(argc, argv)) {
-		printf("Error when parsing command line\n");
-		exit(EXIT_FAILURE);
+	ddcfg_load_specfile(argv[2]);
+	errno = ddcfg_check_spec();
+
+	if (errno) {
+		printf("%d errors found!\n", errno);
+	} else {
+		printf("All clear\n");
 	}
 
 	ddcfg_free();

@@ -121,7 +121,7 @@ struct st_spec * new_spec_from_data(const char * data, int length)
 	struct st_spec * spec;
 	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
 	spec->sections = NULL;
-	spec->contents = (char *) data;
+	spec->contents = (char *) strdup(data);
 	spec->length = length;
 	return spec;
 };

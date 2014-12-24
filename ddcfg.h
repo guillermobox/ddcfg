@@ -47,6 +47,23 @@ double ddcfg_double(const char *section, const char *option);
 
 /* This function will check the configuration of the database with a spec
  */
-int ddcfg_check(const char *specfile);
+/* Load a spec file and parse the contents into the spec tree.
+ */
+int ddcfg_load_specfile(const char *specfile);
+
+/* Load the spec contents directly from memory and parse them. The contents
+ * will be copied to a internal buffer.
+ */
+int ddcfg_load_specdata(const char *contents, int length);
+
+/* Check if the configuration database complies with the spec. Return 0 on
+ * exit, and any number of errors if not.
+ */
+int ddcfg_check_spec();
+
+/* Dump the full contents of the spec in stdout, to check the line number
+ * when a spec error occurs.
+ */
+void ddcfg_dump_spec();
 
 #endif

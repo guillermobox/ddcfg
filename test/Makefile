@@ -7,11 +7,11 @@ test: main
 	@echo
 	@echo "This should fail"
 	@echo
-	./main configuration_fail.cfg --check test.inispec
+	./main configuration_fail.cfg test.inispec
 	@echo
 	@echo "This should pass"
 	@echo
-	./main configuration_pass.cfg --check test.inispec
+	./main configuration_pass.cfg test.inispec
 	@echo
 
 main: ../ddcfg.a main.c

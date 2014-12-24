@@ -56,12 +56,6 @@ int ddcfg_parse(const char *filename)
 	return error;
 };
 
-void ddcfg_dump_spec()
-{
-	if (spec != NULL)
-		dump_spec(spec);
-};
-
 int ddcfg_parse_args(int argc, char *argv[])
 {
 	char *key, *value, *path;
@@ -79,7 +73,8 @@ int ddcfg_parse_args(int argc, char *argv[])
 			if (i + 1 >= argc)
 				return -1;
 			path = argv[++i];
-			ddcfg_check(path);
+			ddcfg_load_specfile(path);
+			ddcfg_check_spec();
 		}
 		else if (strcmp(argv[i], "--spec") == 0) {
 			ddcfg_dump_spec();
@@ -444,17 +439,20 @@ static int ddcfg_check_section(struct st_spec_section *section)
 	return err;
 }
 
-int ddcfg_check(const char *specfile)
+int ddcfg_load_specfile(const char *specfile)
 {
-	struct st_spec_section * section;
-	int err = 0;
+	int err;
 
 	spec = new_spec_from_file(specfile);
 	err = parse_spec(spec);
+
+	return err;
+}
 	
-	if (err) {
-		return -err;
-	}
+int ddcfg_check_spec()
+{
+	struct st_spec_section * section;
+	int err = 0;
 
 	section = spec->sections;
 	while (section) {
@@ -468,3 +466,18 @@ int ddcfg_check(const char *specfile)
 	return err;
 };
 
+int ddcfg_load_specdata(const char *contents, int length)
+{
+	int err;
+
+	spec = new_spec_from_data(contents, length);
+	err = parse_spec(spec);
+
+	return err;
+};
+
+void ddcfg_dump_spec()
+{
+	if (spec != NULL)
+		dump_spec(spec);
+};
