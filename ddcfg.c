@@ -346,7 +346,6 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 		if (property->defaultvalue) {
 			handler(NULL, secname, property->name, property->defaultvalue);
 			value = property->defaultvalue;
-			spec_error("Using default value", property);
 		} else {
 			if (property->depends_on) {
 				struct nlist *search;
