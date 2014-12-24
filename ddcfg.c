@@ -249,6 +249,8 @@ void ddcfg_dump(const char *header, FILE *fout){
 
 void ddcfg_free(){
 	freeall();
+	if (spec)
+		free_spec(spec);
 };
 
 char * ddcfg_is_defined(const char *section, const char *option)
@@ -283,11 +285,12 @@ static int checked_list(const char * section, const char * property)
 	}
 
 	if (section == NULL && property == NULL) {
-		char **item, **visited;
+		char **item, **items, **visited;
 		int found;
 		int errors = 0;
-		item = all_items();
+		items = all_items();
 
+		item = items;
 		while (*item) {
 			found = 0;
 			visited = list;
@@ -306,6 +309,8 @@ static int checked_list(const char * section, const char * property)
 
 			item++;
 		};
+
+		free(items);
 
 		return errors;
 	} else {
@@ -417,6 +422,10 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 			if (strcmp(possible_values[i], value) == 0)
 				break;
 		};
+
+		for (i = 0; i < number_values; i++)
+			free(possible_values[i]);
+		free(possible_values);
 
 		if (i == number_values) {
 			spec_error("Property does not match with value list", property);

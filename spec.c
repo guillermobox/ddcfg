@@ -16,7 +16,7 @@ static int set_property(struct st_spec_property *prop, char *key, char *value)
 	} else if (strcmp(key, "DESCRIPTION") == 0) {
 		if (prop->description) {
 			int length;
-			length = strlen(prop->description) + strlen(value) + 1;
+			length = strlen(prop->description) + strlen(value) + 2;
 			prop->description = realloc(prop->description, length);
 			strcat(prop->description, " ");
 			strcat(prop->description, value);
@@ -51,7 +51,7 @@ static int set_section(struct st_spec_section *section, char *key, char *value)
 	} else if (strcmp(key, "DESCRIPTION") == 0) {
 		if (section->description) {
 			int length;
-			length = strlen(section->description) + strlen(value) + 1;
+			length = strlen(section->description) + strlen(value) + 2;
 			section->description = realloc(section->description, length);
 			strcat(section->description, " ");
 			strcat(section->description, value);
@@ -158,7 +158,7 @@ struct st_spec * new_spec_from_file(const char * path)
 	return spec;
 };
 
-static void delete_property(struct st_spec_property *prop)
+static void free_property(struct st_spec_property *prop)
 {
 	if (prop->name) free(prop->name);
 	if (prop->description) free(prop->description);
@@ -166,24 +166,24 @@ static void delete_property(struct st_spec_property *prop)
 	if (prop->points_to) free(prop->points_to);
 	if (prop->values) free(prop->values);
 	if (prop->defaultvalue) free(prop->defaultvalue);
-	if (prop->next) delete_property(prop->next);
+	if (prop->next) free_property(prop->next);
 	free(prop);
 };
 
-static void delete_section(struct st_spec_section * sec)
+static void free_section(struct st_spec_section * sec)
 {
 	if (sec->name) free(sec->name);
 	if (sec->description) free(sec->description);
 	if (sec->properties)
-		delete_property(sec->properties);
-	if (sec->next) delete_section(sec->next);
+		free_property(sec->properties);
+	if (sec->next) free_section(sec->next);
 	free(sec);
 };
 
-void delete_spec(struct st_spec * spec)
+void free_spec(struct st_spec * spec)
 {
 	if (spec->contents) free(spec->contents);
-	delete_section(spec->sections);
+	free_section(spec->sections);
 	free(spec);
 };
 

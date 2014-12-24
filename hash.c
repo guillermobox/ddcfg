@@ -59,7 +59,7 @@ char **all_items(void)
 	char **items;
 
 	iitem = 0;
-	items = malloc(1024 * sizeof(char*));
+	items = (char **) malloc(1024 * sizeof(char*));
 	for (i = 0; i < 1024; i++)
 		items[i] = NULL;
 
