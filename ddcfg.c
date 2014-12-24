@@ -414,7 +414,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 
 	if (property->values) {
 		char ** possible_values;
-		int i, number_values;
+		int i, j, number_values;
 
 		possible_values = ddcfg_parselist(property->values, &number_values);
 
@@ -423,8 +423,8 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 				break;
 		};
 
-		for (i = 0; i < number_values; i++)
-			free(possible_values[i]);
+		for (j = 0; j < number_values; j++)
+			free(possible_values[j]);
 		free(possible_values);
 
 		if (i == number_values) {
