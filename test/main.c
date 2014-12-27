@@ -28,9 +28,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	};
 
-	errno = ddcfg_check_spec();
-
-	if (errno) {
+	if ((errno = ddcfg_check_spec())){
 		printf("%d errors found!\n", errno);
 	} else {
 		printf("All clear\n");
