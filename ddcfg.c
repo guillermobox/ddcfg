@@ -482,6 +482,8 @@ int ddcfg_load_specdata(const char *contents, int length)
 	int err;
 
 	spec = new_spec_from_data(contents, length);
+	if (spec == NULL)
+		return -1;
 	err = parse_spec(spec);
 
 	return err;
