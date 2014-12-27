@@ -452,6 +452,9 @@ int ddcfg_load_specfile(const char *specfile)
 	int err;
 
 	spec = new_spec_from_file(specfile);
+	if (spec == NULL)
+		return -1;
+
 	err = parse_spec(spec);
 
 	return err;
