@@ -31,8 +31,7 @@ static void spec_error(const char *errormsg, struct st_spec_property *prop)
 			prop->section->name, prop->name, errormsg);
 };
 
-static int handler(void *configuration, const char *section,
-		   const char *option, const char *value)
+static int handler(const char *section, const char *option, const char *value)
 {
 	char *newstr;
 	if (strlen(section) == 0)
@@ -51,7 +50,7 @@ int ddcfg_parse(const char *filename)
 	f = fopen(filename, "r");
 	if (f == NULL)
 		return -1;
-	error = ini_parse_file(f, handler, NULL);
+	error = ini_parse_file(f, handler);
 	fclose(f);
 	return error;
 };
@@ -344,7 +343,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 
 	if (value == NULL) {
 		if (property->defaultvalue) {
-			handler(NULL, secname, property->name, property->defaultvalue);
+			handler(secname, property->name, property->defaultvalue);
 			value = property->defaultvalue;
 		} else {
 			if (property->depends_on) {

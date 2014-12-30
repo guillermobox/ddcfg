@@ -59,9 +59,7 @@ static char *strncpy0(char *dest, const char *src, size_t size)
 	return dest;
 }
 
-int ini_parse_file(FILE * file,
-		   int (*handler) (void *, const char *, const char *, const char *),
-		   void *user)
+int ini_parse_file(FILE * file, int (*handler) (const char *, const char *, const char *))
 {
 	char line[INI_MAX_LINE];
 	char section[MAX_SECTION] = "";
@@ -107,7 +105,7 @@ int ini_parse_file(FILE * file,
 
 				strncpy0(prev_name, name, sizeof(prev_name));
 
-				if (handler(user, section, name, value) && !error)
+				if (handler(section, name, value) && !error)
 					error = lineno;
 			}
 
