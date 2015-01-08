@@ -191,14 +191,15 @@ int ddcfg_bool(const char *section, const char *option)
 
 char ** ddcfg_parselist(const char *string, int *length)
 {
-	char *ptr, *element, *chop;
+	char *ptr, *stringcopy, *element, *chop;
 	char ** list;
 	int len;
 
 	list = malloc(1024 * sizeof(char*));
 	len = 0;
 
-	ptr = (char *) string;
+	stringcopy = strdup(string);
+	ptr = (char *) stringcopy;
 	while (ptr) {
 		element = strsep(&ptr, ",");
 		while (*element == ' ')
@@ -212,6 +213,7 @@ char ** ddcfg_parselist(const char *string, int *length)
 	};
 
 	*length = len;
+	free(stringcopy);
 	return list;
 };
 
