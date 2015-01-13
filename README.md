@@ -26,6 +26,64 @@ library version is available.
 
 After compiling, a small test is found in the folder `test`.
 
+
+Usage
+-----
+
+From the source code, just import the library:
+
+    #include "ddcfg.h"
+
+And then, you have `ddcfg_parse` to load a new `ini` file into the db:
+
+    ddcfg_parse("file.ini");
+
+From this point on, the configuration database has content and can be used
+globally from any point from the source. In order to get a pointer to the
+value of a given key-pair value:
+
+    char * p = ddcfg_get("section", "property");
+
+This will fail and exit the program if the pair is not defined in the database.
+In order to check previously if the pair is defined, do:
+
+    char * p = ddcfg_is_defined("section", "property");
+
+This call will return the value, or NULL if it's not defined. In both cases, the
+value is a pointer to the internal structure, so don't free the pointer p after
+using the value it points to. Also, don't change it. There is also the
+possibility of parsing the value directly:
+
+    int number = ddcfg_int("section", "property");
+    double realnumber = ddcfg_double("section", "property");
+    if (ddcfg_bool("section", "property"))
+    char * listvalues = ddcfg_getlist("section", "property", &size);
+
+The parsing works as follows: if it success, return the desired value. If the
+parsing fails, it stops the execution of the program and prints an error message.
+This is a little excesive, but it's done in order to prevent execution in error
+state. In the case of `ddcfg_bool`, the parser will return 1 if the pair has
+value yes, on, or true; and it will return 0 if the pair has value no, off, or
+false. Any combination of big and small case is allowed.
+
+To manage the spec file, some function calls are also provided. To load the
+specfile from a file or buffer, use: `ddcfg_load_specfile` or
+`ddcfg_load_specdata`. After the spec is loaded, use `ddcfg_check_spec` to
+check it against the loaded database. If there is an error, a positive number
+indicating the number of errors is returned. Errors are printed in the
+standard error.
+
+In any moment, both the database and the loaded spec can be dumped back to the
+terminal, by using `ddcfg_dump` and `ddcfg_dump_spec`. These functions will
+print a working version of the database, in ini format, and a working version
+of the specification, in our spec format. So, they can be explored, changed,
+and reloaded in the code.
+
+After you have finished with everything, `ddcfg_free` will free all the
+resources.
+
+To see a working example, look the spec checker at `test/main.c`.
+
 Configuration file
 ------------------
 
