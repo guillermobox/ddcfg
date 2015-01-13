@@ -16,9 +16,9 @@ command line flags, overwriting the values provided by the `ini` files.
 Once the configuration database is loaded into memory, the user can check a
 given specification (spec). A spec is also a plain text file, that explains in a
 verbose way some requirements that the configuration database has to comply to.
-The library allows the user to check the validity of the configuration database,
-and print an error message if there is any mismatch between the spec and the
-configuration database. See section **Specification file** for more information.
+The library allows the user to check the validity of the database, and print an
+error message if there is any mismatch with the spec. See section
+**Specification file** for more information.
 
 Compile the library running make, you will obtain a `ddcfg.a` to statically
 link into your application. Usually about 30 KB in size. For today, no shared
