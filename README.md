@@ -85,10 +85,17 @@ content. The possible keywords are:
   - **PROPERTY**, indicates a property for the active section
   - **TYPE**, can be `double`, `int`, `bool`, `string`, `list`, `subsection`
   - **DEFAULT**, give a default value to be used in case of absence from db
+  - **VALUES**, give a list of possible values this property can have
   - **DEPENDS_ON**, this property is only needed if the named property is True
   - **POINTS_TO**, this property gives the names of the subsection it points to
 
-An example of specification is this:
+Only the description line is allowed after a section and a subsection. In this
+file, lines beginning with # will be considered to be comments, and ignored.
+Also, any ammount of space between lines, at the start of the line, at the end
+of the line, or between the line keyword and the line content is ignored.
+Usually using a little indentation to differentiate the SECTION, PROPERTY, and
+SUBSETION from the other lines is a very good clue to make the file more human
+readable, but it's completely optional. An example of specification is this:
 
     SECTION Machine
     	DESCRIPTION Information about the Machine to be used with the compiler
