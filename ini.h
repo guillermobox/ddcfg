@@ -9,6 +9,6 @@
  * This function will return 0 on success, and the line number that
  * trows an error on failure.
 */
-int ini_parse_file(FILE* file, int (*handler)(const char* section, const char* name, const char* value));
+__DDCFG_EXPORT__ int ini_parse_file(FILE* file, int (*handler)(const char* section, const char* name, const char* value));
 
 #endif

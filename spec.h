@@ -34,13 +34,12 @@ struct st_spec_property {
 	struct st_spec_section * section;
 };
 
-int parse_spec(struct st_spec *spec);
-void print_spec(struct st_spec *spec, const char * header);
-void free_spec(struct st_spec * spec);
-void dump_spec(struct st_spec *spec);
-struct st_spec * new_spec_from_file(const char * path);
-struct st_spec * new_spec_from_data(const char * data, int length);
-struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname);
-struct st_spec_property * lookup_property(struct st_spec *spec, const char *secname, const char *propname);
+__DDCFG_EXPORT__ int parse_spec(struct st_spec *spec);
+__DDCFG_EXPORT__ void free_spec(struct st_spec * spec);
+__DDCFG_EXPORT__ void dump_spec(struct st_spec *spec);
+__DDCFG_EXPORT__ struct st_spec * new_spec_from_file(const char * path);
+__DDCFG_EXPORT__ struct st_spec * new_spec_from_data(const char * data, int length);
+__DDCFG_EXPORT__ struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname);
+__DDCFG_EXPORT__ struct st_spec_property * lookup_property(struct st_spec *spec, const char *secname, const char *propname);
 
 #endif

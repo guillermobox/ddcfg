@@ -10,7 +10,7 @@
 static struct nlist *hashtab[HASHSIZE];	/* pointer table */
 
 /* form hash value for string s */
-unsigned hash(const char *s)
+__DDCFG_EXPORT__ unsigned hash(const char *s)
 {
 	unsigned hashval;
 	for (hashval = 0; *s != '\0'; s++)
@@ -29,7 +29,7 @@ struct nlist *lookup(const char *s)
 }
 
 /* put (key, value) in hashtab */
-struct nlist *install(const char *key, const char *value)
+__DDCFG_EXPORT__ struct nlist *install(const char *key, const char *value)
 {
 	struct nlist *np;
 	unsigned hashval;
@@ -52,7 +52,7 @@ static int strcomp(const void *p1, const void *p2)
 	return strcmp(* (char * const *) p1, * (char * const *) p2);
 }
 
-char **all_items(void)
+__DDCFG_EXPORT__ char **all_items(void)
 {
 	struct nlist *np;
 	int i, iitem;
@@ -76,7 +76,7 @@ char **all_items(void)
 };
 
 /* get all the keys/values in a string */
-char **getall(void){
+__DDCFG_EXPORT__ char **getall(void){
 	struct nlist *np;
 	int i, iitem;
 	char **items;
@@ -101,7 +101,7 @@ char **getall(void){
 }
 
 /* free all the keys defined */
-void freeall(void){
+__DDCFG_EXPORT__ void freeall(void){
 	struct nlist *np, *next;
 	int i;
 

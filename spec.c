@@ -116,7 +116,7 @@ static struct st_spec_section * new_section(struct st_spec *spec)
 	return psec->next;
 };
 
-struct st_spec * new_spec_from_data(const char * data, int length)
+__DDCFG_EXPORT__ struct st_spec * new_spec_from_data(const char * data, int length)
 {
 	struct st_spec * spec;
 	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
@@ -126,7 +126,7 @@ struct st_spec * new_spec_from_data(const char * data, int length)
 	return spec;
 };
 
-struct st_spec * new_spec_from_file(const char * path)
+__DDCFG_EXPORT__ struct st_spec * new_spec_from_file(const char * path)
 {
 	struct st_spec * spec;
 	FILE * f;
@@ -180,13 +180,14 @@ static void free_section(struct st_spec_section * sec)
 	free(sec);
 };
 
-void free_spec(struct st_spec * spec)
+__DDCFG_EXPORT__ void free_spec(struct st_spec * spec)
 {
 	if (spec->contents) free(spec->contents);
 	free_section(spec->sections);
 	free(spec);
 };
 
+/*
 static void print_property(struct st_spec_property * prop)
 {
 	printf("PROPERTY %s\n", prop->name);
@@ -220,7 +221,7 @@ static void print_section(struct st_spec_section *section)
 	}
 };
 
-void print_spec(struct st_spec *spec, const char * header)
+static void print_spec(struct st_spec *spec, const char * header)
 {
 	struct st_spec_section * section;
 	printf("%s\n", header);
@@ -231,6 +232,7 @@ void print_spec(struct st_spec *spec, const char * header)
 	}
 	printf("%s\n", header);
 };
+*/
 
 static int is_section(char *key)
 {
@@ -249,7 +251,7 @@ static int is_property(char *key)
 	return 0;
 }
 
-struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname)
+__DDCFG_EXPORT__ struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname)
 {
 	struct st_spec_section * section;
 	
@@ -263,7 +265,7 @@ struct st_spec_section * lookup_section(struct st_spec *spec, const char *secnam
 	return NULL;
 };
 
-struct st_spec_property * lookup_property(struct st_spec *spec, const char *secname, const char *propname)
+__DDCFG_EXPORT__ struct st_spec_property * lookup_property(struct st_spec *spec, const char *secname, const char *propname)
 {
 	struct st_spec_section * section;
 	struct st_spec_property * property;
@@ -282,12 +284,12 @@ struct st_spec_property * lookup_property(struct st_spec *spec, const char *secn
 	return NULL;
 };
 
-void dump_spec(struct st_spec *spec)
+__DDCFG_EXPORT__ void dump_spec(struct st_spec *spec)
 {
 	printf("%s", spec->contents);
 };
 	
-int parse_spec(struct st_spec *spec)
+__DDCFG_EXPORT__ int parse_spec(struct st_spec *spec)
 {
 	enum parser_status status;
 	struct st_spec_section * section = NULL;

@@ -59,7 +59,7 @@ static char *strncpy0(char *dest, const char *src, size_t size)
 	return dest;
 }
 
-int ini_parse_file(FILE * file, int (*handler) (const char *, const char *, const char *))
+__DDCFG_EXPORT__ int ini_parse_file(FILE * file, int (*handler) (const char *, const char *, const char *))
 {
 	char line[INI_MAX_LINE];
 	char section[MAX_SECTION] = "";

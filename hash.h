@@ -7,10 +7,11 @@ struct nlist {
 	char *value;
 };
 #define HASHSIZE 101
-struct nlist *lookup(const char *);
-struct nlist *install(const char *, const char *);
-char **getall();
-char **all_items(void);
-void freeall(void);
+
+__DDCFG_EXPORT__ struct nlist *lookup(const char *);
+__DDCFG_EXPORT__ struct nlist *install(const char *, const char *);
+__DDCFG_EXPORT__ char **getall();
+__DDCFG_EXPORT__ char **all_items(void);
+__DDCFG_EXPORT__ void freeall(void);
 
 #endif

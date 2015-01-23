@@ -7,7 +7,7 @@ all: ddcfg.a
 test: ddcfg.a
 	cd test && make
 
-ddcfg.a: ini.o hash.o ddcfg.o spec.o
+ddcfg.a: ddcfg-merged.o
 	ar -rc $@ $^
 
 clean:
