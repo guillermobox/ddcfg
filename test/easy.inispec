@@ -22,3 +22,45 @@ PROPERTY bits
     DESCRIPTION Bit size of the system to simulate
     DESCRIPTION the behaviour of the system if you have changed the
     DESCRIPTION bit type of the processor. You can use 16 or 32.
+
+SECTION Simulation
+    DESCRIPTION Here are the options related to the simulation,
+    DESCRIPTION specially regarding the general outline
+PROPERTY equilibrium
+    TYPE bool
+    DEFAULT true
+    DESCRIPTION Run until the equilibrium is found
+PROPERTY tecplot
+    TYPE bool
+    DEFAULT true
+    DESCRIPTION Save a tecplot file each time the tecplot function is called
+PROPERTY verbosity
+    DESCRIPTION Level of verbosity for the simulation, choose debug
+    DESCRIPTION only when developing code, info or quiet are better
+    DESCRIPTION to run simulations.
+    TYPE string
+    VALUES debug, info, quiet
+    DEFAULT info
+PROPERTY max_iterations
+    DESCRIPTION Maximum number of iterations for the Poisson solver
+    TYPE int
+
+SECTION Scaling
+        DESCRIPTION Scale the device after reading the mesh files
+PROPERTY activate
+        TYPE bool
+        DEFAULT no
+        DESCRIPTION Activate the scaling, for both the mesh and the schrodinger layers
+PROPERTY x
+        TYPE double
+        DEPENDS_ON Scale.activate
+        DESCRIPTION Multiply the first dimension of all nodes by this number
+PROPERTY y
+        TYPE double
+        DEPENDS_ON Scale.activate
+        DESCRIPTION Multiply the second dimension of all nodes by this number
+PROPERTY z
+        TYPE double
+        DEPENDS_ON Scale.activate
+        DESCRIPTION Multiply the third dimension of all nodes by this number
+
