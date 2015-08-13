@@ -115,21 +115,18 @@ class SpecProperty(object):
             text = Gtk.CellRendererText()
             combo.pack_start(text, True)
             combo.add_attribute(text, "text", 0)
+            combo.set_entry_text_column(0)
             hbox.pack_start(combo, False, False, True)
         elif self.type == 'bool':
             switch = Gtk.Switch()
             switch.props.valign = Gtk.Align.CENTER
             hbox.pack_start(switch, False, True, 0)
-        elif self.type == 'int':
-            entry = Gtk.SpinButton(digits=0, numeric=True)
-            entry.set_update_policy(Gtk.SpinButtonUpdatePolicy.ALWAYS)
-            hbox.pack_start(entry, False, True, 0)
         elif self.type == 'path':
             filechooserbutton = Gtk.FileChooserButton(title="Choose path for {0}".format(self.name))
-            #filechooserbutton.connect("file-set", file_changed)
             hbox.pack_start(filechooserbutton, False, True, 0)
         else:
             entry = Gtk.Entry()
+            entry.set_width_chars(8)
             hbox.pack_start(entry, False, True, 0)
         desc = Gtk.Label(self.description, xalign=0)
         desc.set_line_wrap(True)
@@ -176,6 +173,10 @@ class SpecSection(object):
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
+        desc = Gtk.Label(self.description, xalign=0)
+        desc.set_line_wrap(True)
+        vbox.pack_start(desc, False, False, 0)
+
         #namelabel = Gtk.Label(self.name)
         #namelabel.set_markup('<span size="x-large" weight="bold">{0}</span>'.format(self.name))
 
@@ -191,7 +192,7 @@ class SpecSection(object):
         #return list
         vbox.set_border_width(10)
         scroll = Gtk.ScrolledWindow()
-        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.ALWAYS)
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.add_with_viewport(vbox)
         return scroll
 
@@ -209,7 +210,7 @@ class GtkConfig(Gtk.Window):
         self.set_titlebar(hb)
 
         save = Gtk.Button()
-        icon = Gio.ThemedIcon(name="document-save")
+        icon = Gio.ThemedIcon(name="media-floppy")
         image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         save.add(image)
         hb.pack_start(save)
