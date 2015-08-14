@@ -6,8 +6,12 @@
 #define __DDCFG_EXPORT__ extern
 #include "spec.h"
 
-
 struct st_spec * spec;
+
+void test(GtkWidget *widget, gpointer *data)
+{
+	printf("WOP!\n");
+}
 
 GtkWidget * render_property(struct st_spec_property * prop)
 {
@@ -17,7 +21,7 @@ GtkWidget * render_property(struct st_spec_property * prop)
 	GtkWidget * control;
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
 	name = gtk_label_new("");
@@ -27,12 +31,16 @@ GtkWidget * render_property(struct st_spec_property * prop)
 	description = gtk_label_new(prop->description);
 	gtk_label_set_line_wrap(GTK_LABEL(description), TRUE);
 	g_object_set(description, "xalign", 0, 0, NULL);
+
+	GtkWidget * image = gtk_image_new_from_icon_name("dialog-warning", GTK_ICON_SIZE_MENU);
+	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), name, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), NULL, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), description, FALSE, FALSE, 0);
 
 	if (prop->type == BOOL) {
 		control = gtk_switch_new();
+		g_signal_connect(control, "notify::active", G_CALLBACK(test), NULL);
 		if (ddcfg_is_defined(prop->section->name, prop->name)) {
 			if (ddcfg_bool(prop->section->name, prop->name)) {
 				gtk_switch_set_active(GTK_SWITCH(control), TRUE);
@@ -57,6 +65,7 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		} else {
 			gtk_combo_box_set_active(GTK_COMBO_BOX(control), 0);
 		}
+		g_signal_connect(control, "changed", G_CALLBACK(test), NULL);
 	} else if (prop->type == PATH) {
 		control = gtk_file_chooser_button_new("Choose file", GTK_FILE_CHOOSER_ACTION_OPEN);
 		char * defined;
@@ -64,8 +73,10 @@ GtkWidget * render_property(struct st_spec_property * prop)
 			defined = ddcfg_get(prop->section->name, prop->name);
 			gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(control), defined);
 		}
+		g_signal_connect(control, "file-set", G_CALLBACK(test), NULL);
 	} else {
 		control = gtk_entry_new();
+		g_signal_connect(control, "changed", G_CALLBACK(test), NULL);
 		gtk_entry_set_width_chars(GTK_ENTRY(control), 16);
 		gtk_entry_set_alignment(GTK_ENTRY(control), 1);
 		if (ddcfg_is_defined(prop->section->name, prop->name)) {
@@ -149,7 +160,14 @@ static void activate (GtkApplication* app, gpointer user_data)
 	struct st_spec_section *section;
 
 	for (section = spec->sections; section != NULL; section = section->next) {
-		GtkWidget * label = gtk_label_new(section->name);
+		GtkWidget * warning = gtk_image_new_from_icon_name("dialog-warning", GTK_ICON_SIZE_MENU);
+		GtkWidget * labeltext = gtk_label_new(section->name);
+		GtkWidget * label;
+		label = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+		gtk_widget_set_tooltip_text(warning, "There are errors in this section");
+		gtk_box_pack_start(GTK_BOX(label), warning, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(label), labeltext, FALSE, FALSE, 0);
+		gtk_widget_show_all(label);
 		GtkWidget * content = render_section(section);
 		gtk_notebook_append_page(GTK_NOTEBOOK(explorer), content, label);
 	}
