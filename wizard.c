@@ -66,7 +66,8 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		}
 	} else {
 		control = gtk_entry_new();
-		gtk_entry_set_width_chars(GTK_ENTRY(control), 8);
+		gtk_entry_set_width_chars(GTK_ENTRY(control), 16);
+		gtk_entry_set_alignment(GTK_ENTRY(control), 1);
 		if (ddcfg_is_defined(prop->section->name, prop->name)) {
 			gtk_entry_set_text(GTK_ENTRY(control), ddcfg_get(prop->section->name, prop->name));
 		}
