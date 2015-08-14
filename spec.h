@@ -6,7 +6,7 @@
 #endif
 
 enum parser_status {NONE, ONSECTION, ONPROPERTY};
-enum property_type {STRING = 0, INT, BOOL, DOUBLE, SUBSECTION};
+enum property_type {STRING = 0, INT, BOOL, DOUBLE, SUBSECTION, PATH};
 enum section_type {PRIMARY = 0, SECONDARY};
 
 struct st_spec {

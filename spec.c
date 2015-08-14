@@ -4,7 +4,11 @@
 #include <ctype.h>
 #include "spec.h"
 
+<<<<<<< HEAD
 char * type_strings[] = {"string", "int", "bool", "double", "subsection"};
+=======
+char * property_strings[] = {"string", "int", "bool", "double", "subsection", "path"};
+>>>>>>> Add support for path in spec interface
 char * section_strings[] = {"SECTION", "SUBSECTION"};
 
 static int set_property(struct st_spec_property *prop, char *key, char *value)

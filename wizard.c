@@ -16,7 +16,7 @@ GtkWidget * render_property(struct st_spec_property * prop)
 	GtkWidget * control;
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
 	name = gtk_label_new("");
@@ -24,8 +24,6 @@ GtkWidget * render_property(struct st_spec_property * prop)
 	gtk_label_set_markup(GTK_LABEL(name), markup);
 	g_free(markup);
 	description = gtk_label_new(prop->description);
-	//gtk_widget_set_hexpand(description, TRUE);
-	//gtk_widget_set_halign(description, GTK_ALIGN_START);
 	gtk_label_set_line_wrap(GTK_LABEL(description), TRUE);
 	g_object_set(description, "xalign", 0, 0, NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), name, FALSE, FALSE, 0);
@@ -38,12 +36,13 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		int number_values, i;
 		char ** possible_values = ddcfg_parselist(prop->values, &number_values);
 		control = gtk_combo_box_text_new();
-
 		for (i = 0; i < number_values; i++) {
 			gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(control), NULL, possible_values[i]);
 		}
 		gtk_combo_box_set_active(GTK_COMBO_BOX(control), 0);
-	}else {
+	} else if (prop->type == PATH) {
+		control = gtk_file_chooser_button_new("Choose file", GTK_FILE_CHOOSER_ACTION_OPEN);
+	} else {
 		control = gtk_entry_new();
 		gtk_entry_set_width_chars(GTK_ENTRY(control), 8);
 	}
@@ -97,7 +96,7 @@ static void activate (GtkApplication* app, gpointer user_data)
 
 	GtkWidget * savebtn;
 	savebtn = gtk_button_new();
-	GtkWidget * image = gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU);
+	GtkWidget * image = gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_BUTTON);
 	gtk_button_set_image(GTK_BUTTON(savebtn), image);
 
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(header), savebtn);
