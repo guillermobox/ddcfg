@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <gtk/gtk.h>
 
 #include "ddcfg.h"
@@ -32,21 +33,51 @@ GtkWidget * render_property(struct st_spec_property * prop)
 
 	if (prop->type == BOOL) {
 		control = gtk_switch_new();
+		if (ddcfg_is_defined(prop->section->name, prop->name)) {
+			if (ddcfg_bool(prop->section->name, prop->name)) {
+				gtk_switch_set_active(GTK_SWITCH(control), TRUE);
+			}
+		}
 	} else if (prop->values != NULL) {
 		int number_values, i;
 		char ** possible_values = ddcfg_parselist(prop->values, &number_values);
+		char * defined;
 		control = gtk_combo_box_text_new();
 		for (i = 0; i < number_values; i++) {
 			gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(control), NULL, possible_values[i]);
 		}
-		gtk_combo_box_set_active(GTK_COMBO_BOX(control), 0);
+		if (ddcfg_is_defined(prop->section->name, prop->name)) {
+			defined = ddcfg_get(prop->section->name, prop->name);
+			for (i = 0; i < number_values; i++) {
+				if (strcmp(possible_values[i], defined) == 0)
+					break;
+			}
+			if (i != number_values)
+				gtk_combo_box_set_active(GTK_COMBO_BOX(control), i);
+		} else {
+			gtk_combo_box_set_active(GTK_COMBO_BOX(control), 0);
+		}
 	} else if (prop->type == PATH) {
 		control = gtk_file_chooser_button_new("Choose file", GTK_FILE_CHOOSER_ACTION_OPEN);
 	} else {
 		control = gtk_entry_new();
 		gtk_entry_set_width_chars(GTK_ENTRY(control), 8);
+		if (ddcfg_is_defined(prop->section->name, prop->name)) {
+			gtk_entry_set_text(GTK_ENTRY(control), ddcfg_get(prop->section->name, prop->name));
+		}
 	}
+
 	gtk_box_pack_end(GTK_BOX(hbox), control, FALSE, FALSE, 0);
+
+	if (prop->depends_on) {
+		char * key = prop->depends_on;
+		if (ddcfg_bool(NULL, key) == 0) {
+			char tooltip[256];
+			sprintf(tooltip, "Activate <b>%s</b> to use this property", key);
+			gtk_widget_set_sensitive(vbox, FALSE);
+			gtk_widget_set_tooltip_markup(vbox, tooltip);
+		}
+	}
 
 	return vbox;
 };
