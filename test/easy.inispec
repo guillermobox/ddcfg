@@ -53,14 +53,14 @@ PROPERTY activate
         DESCRIPTION Activate the scaling, for both the mesh and the schrodinger layers
 PROPERTY x
         TYPE double
-        DEPENDS_ON Scale.activate
+        DEPENDS_ON Scaling.activate
         DESCRIPTION Multiply the first dimension of all nodes by this number
 PROPERTY y
         TYPE double
-        DEPENDS_ON Scale.activate
+        DEPENDS_ON Scaling.activate
         DESCRIPTION Multiply the second dimension of all nodes by this number
 PROPERTY z
         TYPE double
-        DEPENDS_ON Scale.activate
+        DEPENDS_ON Scaling.activate
         DESCRIPTION Multiply the third dimension of all nodes by this number
 
