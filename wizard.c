@@ -59,6 +59,11 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		}
 	} else if (prop->type == PATH) {
 		control = gtk_file_chooser_button_new("Choose file", GTK_FILE_CHOOSER_ACTION_OPEN);
+		char * defined;
+		if (ddcfg_is_defined(prop->section->name, prop->name)) {
+			defined = ddcfg_get(prop->section->name, prop->name);
+			gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(control), defined);
+		}
 	} else {
 		control = gtk_entry_new();
 		gtk_entry_set_width_chars(GTK_ENTRY(control), 8);
