@@ -6,6 +6,8 @@
 #ifndef __DDCFG_H__
 #define __DDCFG_H__
 
+char ** ddcfg_parselist(const char *string, int *length);
+
 /* Parse a file to the dictionary of key/value pairs. Call this
  * before any other call, otherwise they will return error.
  */

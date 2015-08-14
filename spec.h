@@ -1,6 +1,10 @@
 #ifndef __SPEC_H_
 #define __SPEC_H_
 
+#ifndef __DDCFG_EXPORT__
+#define __DDCFG_EXPORT__ extern
+#endif
+
 enum parser_status {NONE, ONSECTION, ONPROPERTY};
 enum property_type {STRING = 0, INT, BOOL, DOUBLE, SUBSECTION};
 enum section_type {PRIMARY = 0, SECONDARY};

@@ -1,8 +1,14 @@
 #ifndef __HASH_H__
 #define __HASH_H__
 
+<<<<<<< HEAD
 #define STATUS_CACHED 0x01
 #define STATUS_CHECKED 0x02
+=======
+#ifndef __DDCFG_EXPORT__
+#define __DDCFG_EXPORT__ extern
+#endif
+>>>>>>> Add working version of the python mockup, but in C
 
 struct nlist {
 	struct nlist *next;

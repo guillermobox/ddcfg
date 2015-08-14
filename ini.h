@@ -1,6 +1,11 @@
 #ifndef __INI_H__
 #define __INI_H__
 
+#ifndef __DDCFG_EXPORT__
+#define __DDCFG_EXPORT__ extern
+#endif
+
+
 /*
  * Parse a ini file provided by a FILE descriptor. Handler is a callback
  * function that will be called for each section/name found. Handler
