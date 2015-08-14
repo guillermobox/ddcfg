@@ -24,9 +24,10 @@ GtkWidget * render_property(struct st_spec_property * prop)
 	gtk_label_set_markup(GTK_LABEL(name), markup);
 	g_free(markup);
 	description = gtk_label_new(prop->description);
-	gtk_widget_set_hexpand(description, TRUE);
-	gtk_widget_set_halign(description, GTK_ALIGN_START);
+	//gtk_widget_set_hexpand(description, TRUE);
+	//gtk_widget_set_halign(description, GTK_ALIGN_START);
 	gtk_label_set_line_wrap(GTK_LABEL(description), TRUE);
+	g_object_set(description, "xalign", 0, 0, NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), name, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), NULL, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), description, FALSE, FALSE, 0);
@@ -60,6 +61,7 @@ GtkWidget * render_section(struct st_spec_section * section)
 	list = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
 	gtk_container_set_border_width(GTK_CONTAINER(list), 10);
 	description = gtk_label_new(section->description);
+	g_object_set(description, "xalign", 0, 0, NULL);
 
 	gtk_widget_set_hexpand(description, TRUE);
 	gtk_widget_set_halign(description, GTK_ALIGN_START);
