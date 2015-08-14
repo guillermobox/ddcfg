@@ -94,12 +94,11 @@ class SpecProperty(object):
         return 'PROPERTY [{0}] {1}'.format(self.name, self.type)
 
     def render(self):
-        #row = Gtk.ListBoxRow()
-
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        vbox.set_border_width(5)
 
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        #row.add(vbox)
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+
         vbox.pack_start(hbox, True, True, 0)
 
         namelabel = Gtk.Label(self.name, xalign=0)
@@ -115,7 +114,7 @@ class SpecProperty(object):
             text = Gtk.CellRendererText()
             combo.pack_start(text, True)
             combo.add_attribute(text, "text", 0)
-            combo.set_entry_text_column(0)
+            combo.set_active(0)
             hbox.pack_start(combo, False, False, True)
         elif self.type == 'bool':
             switch = Gtk.Switch()
@@ -166,34 +165,19 @@ class SpecSection(object):
             self.properties.append(SpecProperty(property))
 
     def render(self):
-        #list = Gtk.ListBox()
-        #list.set_selection_mode(Gtk.SelectionMode.NONE)
-
-        #row = Gtk.ListBoxRow()
-
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, border_width=5)
 
         desc = Gtk.Label(self.description, xalign=0)
         desc.set_line_wrap(True)
         vbox.pack_start(desc, False, False, 0)
 
-        #namelabel = Gtk.Label(self.name)
-        #namelabel.set_markup('<span size="x-large" weight="bold">{0}</span>'.format(self.name))
-
-        #vbox.pack_start(namelabel, False, True, 0)
-
-        #row.add(namelabel)
-
-        #list.add(row)
-
         for prop in self.properties:
             vbox.pack_start(prop.render(), False, False, 0)
 
-        #return list
-        vbox.set_border_width(10)
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.add_with_viewport(vbox)
+
         return scroll
 
 class GtkConfig(Gtk.Window):
@@ -215,27 +199,18 @@ class GtkConfig(Gtk.Window):
         save.add(image)
         hb.pack_start(save)
 
-        #stack = Gtk.Stack()
         notebook = Gtk.Notebook()
+        notebook.set_scrollable(True)
 
-        #vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         for spec in self.spec:
             section = spec.render()
-            #stack.add_titled(section, spec.name, spec.name)
-            #vbox.pack_start(section, False, False, 0)
-            label = Gtk.Label(spec.name)
-            notebook.append_page(section, label)
-            notebook.set_scrollable(True)
+            la = Gtk.Label(spec.name)
+            box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+            box.pack_start(la, True, True, 0)
+            box.show_all()
+            notebook.append_page(section, box)
 
         self.add(notebook)
-        #switcher = Gtk.StackSwitcher()
-        #switcher.set_stack(stack)
-
-        #vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-
-        #vbox.pack_start(switcher, False, False, 0)
-        #vbox.pack_start(stack, False, False, 0)
-        #self.add(vbox)
 
 import sys
 spec = parsespec(sys.argv[1])
