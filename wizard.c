@@ -68,6 +68,11 @@ GtkWidget * render_section(struct st_spec_section * section)
 
 	gtk_box_pack_start(GTK_BOX(list), description, FALSE, FALSE, 0);
 
+	GtkWidget * sep;
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(list), sep, FALSE, FALSE, 0);
+
+
 	for (prop = section->properties; prop != NULL; prop = prop->next) {
 		GtkWidget * content = render_property(prop);
 		gtk_box_pack_start(GTK_BOX(list), content, FALSE, FALSE, 0);
