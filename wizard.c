@@ -108,6 +108,14 @@ void update_string(GtkWidget *widget, gpointer *data)
 		} else {
 			gtk_widget_hide(prop->widget.alert);
 		}
+	} else {
+		int err = strlen(gtk_entry_get_text(GTK_ENTRY(widget)));
+		if (err == 0) {
+			gtk_widget_show(prop->widget.alert);
+			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should not be empty");
+		} else {
+			gtk_widget_hide(prop->widget.alert);
+		}
 	}
 }
 
