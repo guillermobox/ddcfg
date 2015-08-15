@@ -32,6 +32,7 @@ struct st_spec_property {
 	char * points_to;
 	char * values;
 	char * defaultvalue;
+	void * widget;
 	int specline;
 	enum property_type type;
 	struct st_spec_property * next;

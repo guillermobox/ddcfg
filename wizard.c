@@ -15,6 +15,27 @@ void output_configuration(GtkWidget *widget, gpointer *data)
 	ddcfg_dump(NULL, stdout);
 };
 
+void update_dependencies(struct st_spec_property * prop, int state)
+{
+	struct st_spec_section * section = prop->section->spec->sections;
+
+	char * newstr = malloc(strlen(prop->section->name) + strlen(prop->name) + 2);
+	sprintf(newstr, "%s.%s", prop->section->name, prop->name);
+
+	while (section) {
+		prop = section->properties;
+		while (prop) {
+			if (prop->depends_on && strcmp(prop->depends_on, newstr) == 0) {
+				if (prop->widget)
+					gtk_widget_set_sensitive(GTK_WIDGET(prop->widget), state);
+			}
+			prop = prop->next;
+		}
+		section = section->next;
+	}
+	free(newstr);
+};
+
 void update_boolean(GtkWidget *widget, GParamSpec *pspec, gpointer *data)
 {
 	struct st_spec_property * prop = (struct st_spec_property *) data;
@@ -25,12 +46,15 @@ void update_boolean(GtkWidget *widget, GParamSpec *pspec, gpointer *data)
 		sprintf(newstr, "%s.%s", section, option);
 		install(newstr, "true");
 		free(newstr);
+		update_dependencies(prop, TRUE);
 	} else {
 		char * newstr = malloc(strlen(section) + strlen(option) + 2);
 		sprintf(newstr, "%s.%s", section, option);
 		install(newstr, "false");
 		free(newstr);
+		update_dependencies(prop, FALSE);
 	}
+	/* update now the possible dependencies */
 };
 
 void update_string(GtkWidget *widget, gpointer *data)
@@ -148,6 +172,7 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		}
 	}
 
+	prop->widget = (void*) vbox;
 	return vbox;
 };
 
@@ -235,7 +260,7 @@ static void activate (GtkApplication* app, gpointer user_data)
 	gtk_container_add(GTK_CONTAINER(window), container);
 
 	gtk_window_set_title(GTK_WINDOW(window), "ddcfg GTK Wizard");
-	gtk_window_set_default_size(GTK_WINDOW(window), 500, 600);
+	gtk_window_set_default_size(GTK_WINDOW(window), 600, 800);
 	gtk_widget_show_all(window);
 }
 
