@@ -1,16 +1,68 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <gtk/gtk.h>
 
 #include "ddcfg.h"
 #define __DDCFG_EXPORT__ extern
 #include "spec.h"
+#include "hash.h"
 
 struct st_spec * spec;
 
-void test(GtkWidget *widget, gpointer *data)
+void output_configuration(GtkWidget *widget, gpointer *data)
 {
-	printf("WOP!\n");
+	ddcfg_dump(NULL, stdout);
+};
+
+void update_boolean(GtkWidget *widget, GParamSpec *pspec, gpointer *data)
+{
+	struct st_spec_property * prop = (struct st_spec_property *) data;
+	char * option = prop->name;
+	char * section = prop->section->name;
+	if (gtk_switch_get_active(GTK_SWITCH(widget)) == TRUE) {
+		char * newstr = malloc(strlen(section) + strlen(option) + 2);
+		sprintf(newstr, "%s.%s", section, option);
+		install(newstr, "true");
+		free(newstr);
+	} else {
+		char * newstr = malloc(strlen(section) + strlen(option) + 2);
+		sprintf(newstr, "%s.%s", section, option);
+		install(newstr, "false");
+		free(newstr);
+	}
+};
+
+void update_string(GtkWidget *widget, gpointer *data)
+{
+	struct st_spec_property * prop = (struct st_spec_property *) data;
+	char * option = prop->name;
+	char * section = prop->section->name;
+	char * newstr = malloc(strlen(section) + strlen(option) + 2);
+	sprintf(newstr, "%s.%s", section, option);
+	install(newstr, gtk_entry_get_text(GTK_ENTRY(widget)));
+	free(newstr);
+}
+
+void update_path(GtkWidget *widget, gpointer *data)
+{
+	struct st_spec_property * prop = (struct st_spec_property *) data;
+	char * option = prop->name;
+	char * section = prop->section->name;
+	char * newstr = malloc(strlen(section) + strlen(option) + 2);
+	sprintf(newstr, "%s.%s", section, option);
+	install(newstr, gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(widget)));
+	free(newstr);
+}
+void update_combo(GtkWidget *widget, gpointer *data)
+{
+	struct st_spec_property * prop = (struct st_spec_property *) data;
+	char * option = prop->name;
+	char * section = prop->section->name;
+	char * newstr = malloc(strlen(section) + strlen(option) + 2);
+	sprintf(newstr, "%s.%s", section, option);
+	install(newstr, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget)));
+	free(newstr);
 }
 
 GtkWidget * render_property(struct st_spec_property * prop)
@@ -40,7 +92,7 @@ GtkWidget * render_property(struct st_spec_property * prop)
 
 	if (prop->type == BOOL) {
 		control = gtk_switch_new();
-		g_signal_connect(control, "notify::active", G_CALLBACK(test), NULL);
+		g_signal_connect(control, "notify::active", G_CALLBACK(update_boolean), prop);
 		if (ddcfg_is_defined(prop->section->name, prop->name)) {
 			if (ddcfg_bool(prop->section->name, prop->name)) {
 				gtk_switch_set_active(GTK_SWITCH(control), TRUE);
@@ -65,7 +117,7 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		} else {
 			gtk_combo_box_set_active(GTK_COMBO_BOX(control), 0);
 		}
-		g_signal_connect(control, "changed", G_CALLBACK(test), NULL);
+		g_signal_connect(control, "changed", G_CALLBACK(update_combo), prop);
 	} else if (prop->type == PATH) {
 		control = gtk_file_chooser_button_new("Choose file", GTK_FILE_CHOOSER_ACTION_OPEN);
 		char * defined;
@@ -73,10 +125,10 @@ GtkWidget * render_property(struct st_spec_property * prop)
 			defined = ddcfg_get(prop->section->name, prop->name);
 			gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(control), defined);
 		}
-		g_signal_connect(control, "file-set", G_CALLBACK(test), NULL);
+		g_signal_connect(control, "file-set", G_CALLBACK(update_path), prop);
 	} else {
 		control = gtk_entry_new();
-		g_signal_connect(control, "changed", G_CALLBACK(test), NULL);
+		g_signal_connect(control, "changed", G_CALLBACK(update_string), prop);
 		gtk_entry_set_width_chars(GTK_ENTRY(control), 16);
 		gtk_entry_set_alignment(GTK_ENTRY(control), 1);
 		if (ddcfg_is_defined(prop->section->name, prop->name)) {
@@ -151,6 +203,7 @@ static void activate (GtkApplication* app, gpointer user_data)
 	savebtn = gtk_button_new();
 	GtkWidget * image = gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_BUTTON);
 	gtk_button_set_image(GTK_BUTTON(savebtn), image);
+	g_signal_connect(savebtn, "clicked", G_CALLBACK(output_configuration), NULL);
 
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(header), savebtn);
 
