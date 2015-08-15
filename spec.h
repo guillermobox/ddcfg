@@ -1,5 +1,12 @@
 #ifndef __SPEC_H_
 #define __SPEC_H_
+#include <gtk/gtk.h>
+
+struct st_gtk_property {
+	GtkWidget * widget; /* main widget */
+	GtkWidget * control; /* control widget used by the user */
+	GtkWidget * alert; /* alert widget that shows warnings */
+};
 
 #ifndef __DDCFG_EXPORT__
 #define __DDCFG_EXPORT__ extern
@@ -32,7 +39,7 @@ struct st_spec_property {
 	char * points_to;
 	char * values;
 	char * defaultvalue;
-	void * widget;
+	struct st_gtk_property widget;
 	int specline;
 	enum property_type type;
 	struct st_spec_property * next;

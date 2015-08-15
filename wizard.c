@@ -1,18 +1,39 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <gtk/gtk.h>
 
 #include "ddcfg.h"
 #define __DDCFG_EXPORT__ extern
-#include "spec.h"
 #include "hash.h"
+
+
+#include "spec.h"
 
 struct st_spec * spec;
 
 void output_configuration(GtkWidget *widget, gpointer *data)
 {
 	ddcfg_dump(NULL, stdout);
+};
+
+static int parse_double(const char *string, double *value)
+{
+	char *ptr;
+	ptr = (char *) string;
+	*value = strtod(string, &ptr);
+	if (ptr == string)
+		return 1;
+	return 0;
+};
+
+static int parse_int(const char *string, int *value)
+{
+	char *ptr;
+	ptr = (char *) string;
+	*value = (int) strtol(string, &ptr, 10);
+	if (ptr == string || *ptr != '\0')
+		return 1;
+	return 0;
 };
 
 void update_dependencies(struct st_spec_property * prop, int state)
@@ -26,8 +47,10 @@ void update_dependencies(struct st_spec_property * prop, int state)
 		prop = section->properties;
 		while (prop) {
 			if (prop->depends_on && strcmp(prop->depends_on, newstr) == 0) {
-				if (prop->widget)
-					gtk_widget_set_sensitive(GTK_WIDGET(prop->widget), state);
+				if (prop->widget.widget) {
+					gtk_widget_set_sensitive(GTK_WIDGET(prop->widget.widget), state);
+					gtk_widget_set_has_tooltip(GTK_WIDGET(prop->widget.widget), !state);
+				}
 			}
 			prop = prop->next;
 		}
@@ -54,7 +77,6 @@ void update_boolean(GtkWidget *widget, GParamSpec *pspec, gpointer *data)
 		free(newstr);
 		update_dependencies(prop, FALSE);
 	}
-	/* update now the possible dependencies */
 };
 
 void update_string(GtkWidget *widget, gpointer *data)
@@ -66,6 +88,27 @@ void update_string(GtkWidget *widget, gpointer *data)
 	sprintf(newstr, "%s.%s", section, option);
 	install(newstr, gtk_entry_get_text(GTK_ENTRY(widget)));
 	free(newstr);
+	
+	if (prop->type == INT) {
+		int tmp, err;
+		err = parse_int(gtk_entry_get_text(GTK_ENTRY(widget)), &tmp);
+		if (err) {
+			gtk_widget_show(prop->widget.alert);
+			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should be an integer");
+		} else {
+			gtk_widget_hide(prop->widget.alert);
+		}
+	} else if (prop->type == DOUBLE) {
+		double tmp;
+		int err;
+		err = parse_double(gtk_entry_get_text(GTK_ENTRY(widget)), &tmp);
+		if (err) {
+			gtk_widget_show(prop->widget.alert);
+			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should be a float");
+		} else {
+			gtk_widget_hide(prop->widget.alert);
+		}
+	}
 }
 
 void update_path(GtkWidget *widget, gpointer *data)
@@ -172,7 +215,13 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		}
 	}
 
-	prop->widget = (void*) vbox;
+	struct st_gtk_property pw = {
+		.widget = vbox,
+		.control = control,
+		.alert = image
+	};
+	prop->widget = pw;
+
 	return vbox;
 };
 
