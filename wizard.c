@@ -333,6 +333,8 @@ static void activate (GtkApplication* app, gpointer user_data)
 	struct st_spec_section *section;
 
 	for (section = spec->sections; section != NULL; section = section->next) {
+		if (section->type == SECONDARY)
+			continue;
 		GtkWidget * warning = gtk_image_new_from_icon_name("dialog-warning", GTK_ICON_SIZE_MENU);
 		GtkWidget * labeltext = gtk_label_new(section->name);
 		GtkWidget * label;
