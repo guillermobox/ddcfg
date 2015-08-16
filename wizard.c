@@ -58,6 +58,14 @@ static int parse_int(const char *string, int *value)
 
 int check_property(struct st_spec_property * prop)
 {
+	if (prop->depends_on) {
+		char * key = prop->depends_on;
+		if (ddcfg_bool(NULL, key) == 0) {
+			gtk_widget_hide(prop->widget.alert);
+			return 0;
+		}
+	};
+
 	if (prop->values != NULL) {
 		gtk_widget_hide(prop->widget.alert);
 		return 0;
@@ -158,6 +166,8 @@ void update_boolean(GtkWidget *widget, GParamSpec *pspec, gpointer *data)
 		free(newstr);
 		update_dependencies(prop, FALSE);
 	}
+
+	check_section(prop->section);
 };
 
 void update_string(GtkWidget *widget, gpointer *data)
