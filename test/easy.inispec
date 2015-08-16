@@ -44,6 +44,7 @@ PROPERTY verbosity
 PROPERTY max_iterations
     DESCRIPTION Maximum number of iterations for the Poisson solver
     TYPE int
+    DEFAULT 100
 
 SECTION Scaling
         DESCRIPTION Scale the device after reading the mesh files

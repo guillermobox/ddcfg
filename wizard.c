@@ -105,6 +105,15 @@ int check_property(struct st_spec_property * prop)
 	} else if (prop->type == BOOL) {
 		gtk_widget_hide(prop->widget.alert);
 		return 0;
+	} else if (prop->type == PATH) {
+		if (gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(prop->widget.control)) != NULL) {
+			gtk_widget_hide(prop->widget.alert);
+			return 0;
+		} else {
+			gtk_widget_show(prop->widget.alert);
+			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should not be empty");
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -192,6 +201,8 @@ void update_path(GtkWidget *widget, gpointer *data)
 	sprintf(newstr, "%s.%s", section, option);
 	install(newstr, gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(widget)));
 	free(newstr);
+
+	check_section(prop->section);
 }
 
 void update_combo(GtkWidget *widget, gpointer *data)
