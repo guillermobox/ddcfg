@@ -8,6 +8,11 @@ struct st_gtk_property {
 	GtkWidget * alert; /* alert widget that shows warnings */
 };
 
+struct st_gtk_section {
+	GtkWidget * widget; /* main widget */
+	GtkWidget * alert; /* alert widget that shows warnings */
+};
+
 #ifndef __DDCFG_EXPORT__
 #define __DDCFG_EXPORT__ extern
 #endif
@@ -27,6 +32,7 @@ struct st_spec_section {
 	char * description;
 	int specline;
 	enum section_type type;
+	struct st_gtk_section widget;
 	struct st_spec * spec;
 	struct st_spec_section * next;
 	struct st_spec_property * properties;

@@ -19,6 +19,7 @@ void output_configuration(GtkWidget *widget, gpointer *data)
 static int parse_double(const char *string, double *value)
 {
 	char *ptr;
+	if (string == NULL) return 1;
 	ptr = (char *) string;
 	*value = strtod(string, &ptr);
 	if (ptr == string)
@@ -29,11 +30,74 @@ static int parse_double(const char *string, double *value)
 static int parse_int(const char *string, int *value)
 {
 	char *ptr;
+	if (string == NULL) return 1;
 	ptr = (char *) string;
 	*value = (int) strtol(string, &ptr, 10);
 	if (ptr == string || *ptr != '\0')
 		return 1;
 	return 0;
+};
+
+
+int check_property(struct st_spec_property * prop)
+{
+	if (prop->values != NULL) {
+		gtk_widget_hide(prop->widget.alert);
+		return 0;
+	} else if (prop->type == INT) {
+		int tmp, err;
+		err = parse_int(gtk_entry_get_text(GTK_ENTRY(prop->widget.control)), &tmp);
+		if (err) {
+			gtk_widget_show(prop->widget.alert);
+			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should be an integer");
+			return 1;
+		} else {
+			gtk_widget_hide(prop->widget.alert);
+			return 0;
+		}
+	} else if (prop->type == DOUBLE) {
+		double tmp;
+		int err;
+		err = parse_double(gtk_entry_get_text(GTK_ENTRY(prop->widget.control)), &tmp);
+		if (err) {
+			gtk_widget_show(prop->widget.alert);
+			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should be a float");
+			return 1;
+		} else {
+			gtk_widget_hide(prop->widget.alert);
+			return 0;
+		}
+	} else if (prop->type == STRING) {
+		const char * text = gtk_entry_get_text(GTK_ENTRY(prop->widget.control));
+		if (text && strlen(text)) {
+			gtk_widget_hide(prop->widget.alert);
+			return 0;
+		} else {
+			gtk_widget_show(prop->widget.alert);
+			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should not be empty");
+			return 1;
+		}
+	} else if (prop->type == BOOL) {
+		gtk_widget_hide(prop->widget.alert);
+		return 0;
+	}
+	return 0;
+}
+
+void check_section(struct st_spec_section * section) {
+	struct st_spec_property * prop;
+	int err = 0;
+	for (prop = section->properties; prop != NULL; prop = prop->next) {
+		err += check_property(prop);
+	}
+	if (err == 0) {
+		gtk_widget_hide(section->widget.alert);
+	} else {
+		char error[64];
+		snprintf(error, 64, "There are <b>%d errors</b> in this section\n", err);
+		gtk_widget_show(section->widget.alert);
+		gtk_widget_set_tooltip_markup(section->widget.alert, error);
+	}
 };
 
 void update_dependencies(struct st_spec_property * prop, int state)
@@ -89,34 +153,7 @@ void update_string(GtkWidget *widget, gpointer *data)
 	install(newstr, gtk_entry_get_text(GTK_ENTRY(widget)));
 	free(newstr);
 	
-	if (prop->type == INT) {
-		int tmp, err;
-		err = parse_int(gtk_entry_get_text(GTK_ENTRY(widget)), &tmp);
-		if (err) {
-			gtk_widget_show(prop->widget.alert);
-			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should be an integer");
-		} else {
-			gtk_widget_hide(prop->widget.alert);
-		}
-	} else if (prop->type == DOUBLE) {
-		double tmp;
-		int err;
-		err = parse_double(gtk_entry_get_text(GTK_ENTRY(widget)), &tmp);
-		if (err) {
-			gtk_widget_show(prop->widget.alert);
-			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should be a float");
-		} else {
-			gtk_widget_hide(prop->widget.alert);
-		}
-	} else {
-		int err = strlen(gtk_entry_get_text(GTK_ENTRY(widget)));
-		if (err == 0) {
-			gtk_widget_show(prop->widget.alert);
-			gtk_widget_set_tooltip_text(prop->widget.alert, "This property should not be empty");
-		} else {
-			gtk_widget_hide(prop->widget.alert);
-		}
-	}
+	check_section(prop->section);
 }
 
 void update_path(GtkWidget *widget, gpointer *data)
@@ -129,6 +166,7 @@ void update_path(GtkWidget *widget, gpointer *data)
 	install(newstr, gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(widget)));
 	free(newstr);
 }
+
 void update_combo(GtkWidget *widget, gpointer *data)
 {
 	struct st_spec_property * prop = (struct st_spec_property *) data;
@@ -305,6 +343,12 @@ static void activate (GtkApplication* app, gpointer user_data)
 		gtk_widget_show_all(label);
 		GtkWidget * content = render_section(section);
 		gtk_notebook_append_page(GTK_NOTEBOOK(explorer), content, label);
+
+		struct st_gtk_section se = {
+			.widget = content,
+			.alert = warning,
+		};
+		section->widget = se;
 	}
 
 	gtk_box_pack_start(GTK_BOX(container), header, FALSE, FALSE, 0);
@@ -319,6 +363,12 @@ static void activate (GtkApplication* app, gpointer user_data)
 	gtk_window_set_title(GTK_WINDOW(window), "ddcfg GTK Wizard");
 	gtk_window_set_default_size(GTK_WINDOW(window), 600, 800);
 	gtk_widget_show_all(window);
+
+	/* now check all the keys, and probably fix them */
+
+	for (section = spec->sections; section != NULL; section = section->next) {
+		check_section(section);
+	}
 }
 
 int main(int argc, char *argv[])
