@@ -60,7 +60,7 @@ int check_property(struct st_spec_property * prop)
 {
 	if (prop->depends_on) {
 		char * key = prop->depends_on;
-		if (ddcfg_bool(NULL, key) == 0) {
+		if (ddcfg_is_defined(NULL, key) && ddcfg_bool(NULL, key) == 0) {
 			gtk_widget_hide(prop->widget.alert);
 			return 0;
 		}
@@ -280,7 +280,7 @@ GtkWidget * render_property(struct st_spec_property * prop)
 
 	if (prop->depends_on) {
 		char * key = prop->depends_on;
-		if (ddcfg_bool(NULL, key) == 0) {
+		if (ddcfg_is_defined(NULL, key) && ddcfg_bool(NULL, key) == 0) {
 			char tooltip[256];
 			sprintf(tooltip, "Activate <b>%s</b> to use this property", key);
 			gtk_widget_set_sensitive(vbox, FALSE);
@@ -425,6 +425,9 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+
+	ddcfg_load_specfile(argv[1]);
+	ddcfg_check_spec();
 
 	GtkApplication *app;
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
