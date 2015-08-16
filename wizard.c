@@ -10,10 +10,27 @@
 #include "spec.h"
 
 struct st_spec * spec;
+GtkWidget *window;
+char * defaultfilename;
 
 void output_configuration(GtkWidget *widget, gpointer *data)
 {
-	ddcfg_dump(NULL, stdout);
+	GtkWidget * savedialog = gtk_file_chooser_dialog_new(
+			"Save configuration file",
+			GTK_WINDOW(window),
+			GTK_FILE_CHOOSER_ACTION_SAVE,
+			"Cancel", GTK_RESPONSE_CANCEL,
+			"Save", GTK_RESPONSE_ACCEPT,
+			NULL);
+
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(savedialog), defaultfilename);
+	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(savedialog), TRUE);
+	int res = gtk_dialog_run(GTK_DIALOG(savedialog));
+	if (res == GTK_RESPONSE_ACCEPT) {
+		char * filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(savedialog));
+		printf("Writing filename %s\n", filename);
+	}
+	gtk_widget_destroy(savedialog);
 };
 
 static int parse_double(const char *string, double *value)
@@ -308,7 +325,6 @@ GtkWidget * render_section(struct st_spec_section * section)
 
 static void activate (GtkApplication* app, gpointer user_data)
 {
-	GtkWidget *window;
 	GtkWidget *header;
 	GtkWidget *explorer;
 	GtkWidget *container;
@@ -363,7 +379,7 @@ static void activate (GtkApplication* app, gpointer user_data)
 	gtk_container_add(GTK_CONTAINER(window), container);
 
 	gtk_window_set_title(GTK_WINDOW(window), "ddcfg GTK Wizard");
-	gtk_window_set_default_size(GTK_WINDOW(window), 600, 800);
+	gtk_window_set_default_size(GTK_WINDOW(window), 600, 500);
 	gtk_widget_show_all(window);
 
 	/* now check all the keys, and probably fix them */
@@ -391,6 +407,7 @@ int main(int argc, char *argv[])
 	}
 
 	for (arg = 2; arg < argc; arg++) {
+		defaultfilename = argv[2];
 		fprintf(stdout, "Reading file %s as configuration file\n", argv[arg]);
 		status = ddcfg_parse(argv[arg]);
 		if (status) {
