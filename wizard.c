@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "ddcfg.h"
 #define __DDCFG_EXPORT__ extern
@@ -129,8 +130,10 @@ void check_section(struct st_spec_section * section) {
 	} else {
 		char error[64];
 		snprintf(error, 64, "There are <b>%d errors</b> in this section\n", err);
-		gtk_widget_show(section->widget.alert);
-		gtk_widget_set_tooltip_markup(section->widget.alert, error);
+		if (section->widget.alert) {
+			gtk_widget_show(GTK_WIDGET(section->widget.alert));
+			gtk_widget_set_tooltip_markup(GTK_WIDGET(section->widget.alert), error);
+		}
 	}
 };
 
@@ -238,17 +241,16 @@ GtkWidget * render_property(struct st_spec_property * prop)
 	GtkWidget * image = gtk_image_new_from_icon_name("dialog-warning", GTK_ICON_SIZE_MENU);
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), name, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), NULL, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), description, FALSE, FALSE, 0);
 
 	if (prop->type == BOOL) {
 		control = gtk_switch_new();
-		g_signal_connect(control, "notify::active", G_CALLBACK(update_boolean), prop);
 		if (ddcfg_is_defined(prop->section->name, prop->name)) {
 			if (ddcfg_bool(prop->section->name, prop->name)) {
 				gtk_switch_set_active(GTK_SWITCH(control), TRUE);
 			}
 		}
+		g_signal_connect(control, "notify::active", G_CALLBACK(update_boolean), prop);
 	} else if (prop->values != NULL) {
 		int number_values, i;
 		char ** possible_values = ddcfg_parselist(prop->values, &number_values);
@@ -279,12 +281,12 @@ GtkWidget * render_property(struct st_spec_property * prop)
 		g_signal_connect(control, "file-set", G_CALLBACK(update_path), prop);
 	} else {
 		control = gtk_entry_new();
-		g_signal_connect(control, "changed", G_CALLBACK(update_string), prop);
 		gtk_entry_set_width_chars(GTK_ENTRY(control), 16);
 		gtk_entry_set_alignment(GTK_ENTRY(control), 1);
 		if (ddcfg_is_defined(prop->section->name, prop->name)) {
 			gtk_entry_set_text(GTK_ENTRY(control), ddcfg_get(prop->section->name, prop->name));
 		}
+		g_signal_connect(control, "changed", G_CALLBACK(update_string), prop);
 	}
 
 	gtk_box_pack_end(GTK_BOX(hbox), control, FALSE, FALSE, 0);
@@ -295,14 +297,14 @@ GtkWidget * render_property(struct st_spec_property * prop)
 			char tooltip[256];
 			sprintf(tooltip, "Activate <b>%s</b> to use this property", key);
 			gtk_widget_set_sensitive(vbox, FALSE);
-			gtk_widget_set_tooltip_markup(vbox, tooltip);
+			gtk_widget_set_tooltip_markup(GTK_WIDGET(vbox), tooltip);
 		}
 	}
 
 	struct st_gtk_property pw = {
 		.widget = vbox,
 		.control = control,
-		.alert = image
+		.alert = GTK_WIDGET(image)
 	};
 	prop->widget = pw;
 
@@ -385,8 +387,9 @@ static void activate (GtkApplication* app, gpointer user_data)
 
 		struct st_gtk_section se = {
 			.widget = content,
-			.alert = warning,
+			.alert = GTK_WIDGET(warning),
 		};
+		assert(se.alert != NULL);
 		section->widget = se;
 	}
 
@@ -406,6 +409,7 @@ static void activate (GtkApplication* app, gpointer user_data)
 	/* now check all the keys, and probably fix them */
 
 	for (section = spec->sections; section != NULL; section = section->next) {
+		if (section->type == PRIMARY)
 		check_section(section);
 	}
 }

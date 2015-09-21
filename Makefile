@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 CFLAGS=-g -Wall
-=======
-CFLAGS=-g -fno-diagnostics-show-caret -Wall `pkg-config --cflags gtk+-3.0`
->>>>>>> Add support to check integers or doubles at interface
 
 all: wizard
 
