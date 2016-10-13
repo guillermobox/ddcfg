@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "hash.h"
 #include "ini.h"
 #include "spec.h"
@@ -80,6 +81,27 @@ int ddcfg_parse_args(int argc, char *argv[])
 		};
 	};
 	return 0;
+};
+
+int ddcfg_select(const char *section, const char *option, int n, ...)
+{
+	char * value, * check;
+	va_list options;
+	int i;
+
+	value = ddcfg_get(section, option);
+
+	va_start(options, n);
+
+	for (i = 0; i < n; i++) {
+		check = va_arg(options, char*);
+		if (strncmp(value, check, strlen(value)) == 0) {
+			return i;
+		}
+	}
+
+	va_end(options);
+	return -1;
 };
 
 char *ddcfg_get(const char *section, const char *option)

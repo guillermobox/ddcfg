@@ -27,6 +27,12 @@ void ddcfg_free();
  */
 void ddcfg_dump(const char *header, FILE *fout);
 
+/* This function will return a number from 0 to n if the value assigned in
+ * the dictionary matches one of the provided in the variable args. If none,
+ * -1 is teturned.
+ */
+int ddcfg_select(const char *section, const char *option, int n, ...);
+
 /* This function checks if a certain section.option is defined
  */
 char * ddcfg_is_defined(const char *section, const char *option);
