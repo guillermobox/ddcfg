@@ -1,18 +1,16 @@
+all: tests
 
-all: test
+.PHONY: tests testdriver all clean
 
-.PHONY: test
+clean:
+	$(RM) -f testdriver
 
-test: main
+tests: testdriver
 	@echo
-	@echo "This should fail"
+	@echo Running tests
 	@echo
-	./main configuration_fail.cfg test.inispec
-	@echo
-	@echo "This should pass"
-	@echo
-	./main configuration_pass.cfg test.inispec
+	@python2 ybt.py testsuite.yaml
 	@echo
 
-main: ../ddcfg.a main.c
-	$(CC) main.c ../ddcfg.a -o main
+testdriver: testdriver.c ../ddcfg.a
+	$(CC) $^ -o $@

@@ -1,0 +1,11 @@
+configuration: ""
+
+tests:
+
+  - name   : FileNotExisting
+    run    : ./testdriver unexistingfile.cfg
+    return : 1
+
+  - name   : Passing
+    run    : ./testdriver Tests/pass.cfg
+    return : 0
