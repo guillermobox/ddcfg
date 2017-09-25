@@ -5,7 +5,7 @@ all: tests
 clean:
 	$(RM) -f testdriver
 
-tests: testdriver
+tests: testdriver test_select
 	@echo
 	@echo Running tests
 	@echo
@@ -13,4 +13,7 @@ tests: testdriver
 	@echo
 
 testdriver: testdriver.c ../ddcfg.a
+	$(CC) $^ -o $@
+
+test_select: test_select.c ../ddcfg.a
 	$(CC) $^ -o $@

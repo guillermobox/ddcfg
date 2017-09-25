@@ -9,3 +9,7 @@ tests:
   - name   : Passing
     run    : ./testdriver Tests/pass.cfg
     return : 0
+
+  - name   : SelectFunction
+    run    : ./test_select Tests/select.ini
+    return : 0
