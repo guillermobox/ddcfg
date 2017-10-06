@@ -44,6 +44,25 @@ static int handler(const char *section, const char *option, const char *value)
 	return 0;
 };
 
+static struct nlist * ddcfg_lookup(const char *section, const char *option)
+{
+	struct nlist *search;
+	char *newstr;
+
+	if (section == NULL || strlen(section) == 0) {
+		search = lookup(option);
+	} else {
+		newstr = malloc(strlen(section) + strlen(option) + 2);
+		sprintf(newstr, "%s.%s", section, option);
+		search = lookup(newstr);
+		free(newstr);
+	}
+	if (search == NULL)
+		die(section, option, NULL, NULL);
+	return search;
+};
+
+
 int ddcfg_parse(const char *filename)
 {
 	FILE *f;
@@ -106,20 +125,8 @@ int ddcfg_select(const char *section, const char *option, int n, ...)
 
 char *ddcfg_get(const char *section, const char *option)
 {
-	struct nlist *search;
-	char *newstr;
-
-	if (section == NULL || strlen(section) == 0) {
-		search = lookup(option);
-	} else {
-		newstr = malloc(strlen(section) + strlen(option) + 2);
-		sprintf(newstr, "%s.%s", section, option);
-		search = lookup(newstr);
-		free(newstr);
-	}
-	if (search == NULL)
-		die(section, option, NULL, NULL);
-	return search->value;
+	struct nlist * entry = ddcfg_lookup(section, option);
+	return entry->value;
 };
 
 static int ddcfg_parse_double(const char *string, double *value)
@@ -134,14 +141,20 @@ static int ddcfg_parse_double(const char *string, double *value)
 
 double ddcfg_double(const char *section, const char *option)
 {
-	char *answer;
+	struct nlist * entry;
 	double number;
 	int err;
 
-	answer = ddcfg_get(section, option);
-	err = ddcfg_parse_double(answer, &number);
+	entry = ddcfg_lookup(section, option);
+
+	if (entry->cached == 1) {
+		return entry->d_cache;
+	}
+	err = ddcfg_parse_double(entry->value, &number);
 	if (err)
-		die(section, option, "double", answer);
+		die(section, option, "double", entry->value);
+	entry->cached = 1;
+	entry->d_cache = number;
 	return number;
 };
 
@@ -157,14 +170,20 @@ static int ddcfg_parse_int(const char *string, int *value)
 
 int ddcfg_int(const char *section, const char *option)
 {
-	char *answer;
+	struct nlist * entry;
 	int number;
 	int err;
 
-	answer = ddcfg_get(section, option);
-	err = ddcfg_parse_int(answer, &number);
+	entry = ddcfg_lookup(section, option);
+
+	if (entry->cached == 1) {
+		return entry->i_cache;
+	}
+	err = ddcfg_parse_int(entry->value, &number);
 	if (err)
-		die(section, option, "int", answer);
+		die(section, option, "int", entry->value);
+	entry->cached = 1;
+	entry->i_cache = number;
 	return number;
 };
 
@@ -199,15 +218,18 @@ static int ddcfg_parse_bool(const char *string, int *value)
 
 int ddcfg_bool(const char *section, const char *option)
 {
-	char *answer;
+	struct nlist * entry;
 	int value, err;
 
-	answer = ddcfg_get(section, option);
-	err = ddcfg_parse_bool(answer, &value);
-
+	entry = ddcfg_lookup(section, option);
+	if (entry->cached == 1) {
+		return entry->i_cache;
+	}
+	err = ddcfg_parse_bool(entry->value, &value);
 	if (err)
-		die(section, option, "bool", answer);
-
+		die(section, option, "bool", entry->value);
+	entry->cached = 1;
+	entry->i_cache = value;
 	return value;
 };
 

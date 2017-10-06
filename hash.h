@@ -5,6 +5,12 @@ struct nlist {
 	struct nlist *next;
 	char *key;
 	char *value;
+	int cached;
+	union {
+		double d_cache;
+		int i_cache;
+		long l_cache;
+	};
 };
 #define HASHSIZE 101
 
