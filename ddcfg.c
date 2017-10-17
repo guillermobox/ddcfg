@@ -44,6 +44,13 @@ static int handler(const char *section, const char *option, const char *value)
 	return 0;
 };
 
+int ddcfg_set(const char *key, const char *value)
+{
+	if (install(key, value) != NULL)
+		return 0;
+	return -1;
+};
+
 static struct nlist * ddcfg_lookup(const char *section, const char *option)
 {
 	struct nlist *search;
