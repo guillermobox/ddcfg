@@ -13,3 +13,15 @@ tests:
   - name   : SelectFunction
     run    : ./test_select Tests/select.ini
     return : 0
+
+  - name   : ReadNormal
+    run    : ./testdriver Tests/normal.ini
+    return : 0
+
+  - name   : ReadLarge
+    run    : ./testdriver Tests/large.ini
+    return : 0
+
+  - name   : ReadHuge
+    run    : ./testdriver Tests/huge.ini
+    return : 0
