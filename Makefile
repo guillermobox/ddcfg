@@ -1,4 +1,4 @@
-CFLAGS=-g -fno-diagnostics-show-caret -Wall
+CFLAGS=-g -Wall
 
 all: ddcfg.a
 
