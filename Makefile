@@ -10,5 +10,7 @@ test: ddcfg.a
 ddcfg.a: ddcfg-merged.o
 	ar -rc $@ $^
 
+ddcfg-merged.o: $(wildcard *.c)
+
 clean:
 	rm -f *.o *.a
