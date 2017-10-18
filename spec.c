@@ -10,6 +10,7 @@ char * section_strings[] = {"SECTION", "SUBSECTION"};
 static int set_property(struct st_spec_property *prop, char *key, char *value)
 {
 	if (strcmp(key, "NAME") == 0) {
+		if (prop->name) return 1;
 		prop->name = strdup(value);
 	} else if (strcmp(key, "DESCRIPTION") == 0) {
 		if (prop->description) {
@@ -22,19 +23,25 @@ static int set_property(struct st_spec_property *prop, char *key, char *value)
 			prop->description = strdup(value);
 		}
 	} else if (strcmp(key, "DEPENDS_ON") == 0) {
+		if (prop->depends_on) return 1;
 		prop->depends_on = strdup(value);
 	} else if (strcmp(key, "POINTS_TO") == 0) {
+		if (prop->points_to) return 1;
 		prop->points_to = strdup(value);
 	} else if (strcmp(key, "TYPE") == 0) {
 		int i;
 		for (i=0; i < sizeof(type_strings) / sizeof(char*); i++) {
 			if (strcmp(value, type_strings[i]) == 0) {
 				prop->type = i;
+				return 0;
 			}
 		};
+		return 1;
 	} else if (strcmp(key, "DEFAULT") == 0) {
+		if (prop->defaultvalue) return 1;
 		prop->defaultvalue = strdup(value);
 	} else if (strcmp(key, "VALUES") == 0) {
+		if (prop->values) return 1;
 		prop->values = strdup(value);
 	} else {
 		return 1;
@@ -45,6 +52,7 @@ static int set_property(struct st_spec_property *prop, char *key, char *value)
 static int set_section(struct st_spec_section *section, char *key, char *value)
 {
 	if (strcmp(key, "NAME") == 0) {
+		if (section->name) return 1;
 		section->name = strdup(value);
 	} else if (strcmp(key, "DESCRIPTION") == 0) {
 		if (section->description) {

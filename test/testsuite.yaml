@@ -25,3 +25,7 @@ tests:
   - name   : ReadHuge
     run    : ./testdriver Tests/huge.ini
     return : 0
+
+  - name   : WrongSpec
+    run    : ./testdriver Tests/empty.ini Tests/wrong.spec
+    output : 13 errors found!

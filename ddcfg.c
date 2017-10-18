@@ -386,10 +386,115 @@ static int ddcfg_check_subsection(struct st_spec_section *section, const char *s
 	return err;
 };
 
+static int ddcfg_spec_check_type(struct st_spec_property *property, char * value)
+{
+	if (property->type == INT) {
+		int tmp;
+		return ddcfg_parse_int(value, &tmp);
+	} else if (property->type == DOUBLE) {
+		double tmp;
+		return ddcfg_parse_double(value, &tmp);
+	} else if (property->type == BOOL) {
+		int tmp;
+		return ddcfg_parse_bool(value, &tmp);
+	}
+	return 0;
+};
+
+static int ddcfg_spec_internal_consistency(struct st_spec_section *section, struct st_spec_property *property)
+{
+	int err = 0;
+
+	if (property->defaultvalue) {
+		if (ddcfg_spec_check_type(property, property->defaultvalue)) {
+			err++;
+			spec_error("Consistency problem, the default value does not parse", property);
+		}
+	}
+	if (property->values) {
+		char ** possible_values;
+		int i, j, number_values;
+
+		possible_values = ddcfg_parselist(property->values, &number_values);
+
+		for (i = 0; i < number_values; i++) {
+			if (strlen(possible_values[i]) == 0) {
+				err++;
+				spec_error("Consistency problem, one of the values is empty", property);
+			}
+			if (ddcfg_spec_check_type(property, possible_values[i])) {
+				err++;
+				spec_error("Consistency problem, one of the values does not parse", property);
+			}
+		}
+
+		if (property->defaultvalue) {
+			for (i = 0; i < number_values; i++) {
+				if (strcmp(possible_values[i], property->defaultvalue) == 0)
+					break;
+			}
+			if (i == number_values) {
+				err++;
+				spec_error("Consistency problem, the default value is not in the list of values", property);
+			}
+
+		}
+
+		for (j = 0; j < number_values; j++)
+			free(possible_values[j]);
+		free(possible_values);
+	}
+	if (property->depends_on) {
+		struct st_spec_property * remote;
+		char * remotefull = strdup(property->depends_on);
+		char *remotesec, *remoteprop;
+
+		remotesec = strtok(remotefull, ".");
+		remoteprop = strtok(NULL, ".");
+
+		remote = lookup_property(spec, remotesec, remoteprop);
+		free(remotefull);
+
+		if (remote == NULL) {
+			err++;
+			spec_error("Consistency problem, this property points to a unknown property", property);
+		} else {
+			if (remote->type != BOOL) {
+				err++;
+				spec_error("Consistency problem, this property points to a non-boolean property", property);
+			}
+			if (remote == property) {
+				err++;
+				spec_error("Consistency problem, this property points to itself", property);
+			}
+		}
+	}
+
+	if (property->points_to) {
+		struct st_spec_section * remote;
+
+		remote = lookup_section(spec, property->points_to);
+
+		if (remote == NULL) {
+			err++;
+			spec_error("Consistency problem, this property points to a unknown section", property);
+		} else {
+			if (remote->type != SECONDARY) {
+				err++;
+				spec_error("Consistency problem, this property points to a section which is not subsection", property);
+			}
+		}
+	}
+	return err;
+};
+
 static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname)
 {
 	const char * value;
 	int err;
+
+	if ((err = ddcfg_spec_internal_consistency(section, property)) != 0)
+		return err;
 
 	checked_list(secname, property->name);
 	value = ddcfg_is_defined(secname, property->name);

@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
 			printf("All clear\n");
 		}
 
-		ddcfg_free();
 	}
+	ddcfg_free();
 
 	return EXIT_SUCCESS;
 };
