@@ -7,8 +7,6 @@
 char * property_strings[] = {"string", "int", "bool", "double", "subsection"};
 char * section_strings[] = {"SECTION", "SUBSECTION"};
 
-#define BUFSIZE 256
-
 static int set_property(struct st_spec_property *prop, char *key, char *value)
 {
 	if (strcmp(key, "NAME") == 0) {
@@ -294,7 +292,8 @@ __DDCFG_EXPORT__ int parse_spec(struct st_spec *spec)
 	enum parser_status status;
 	struct st_spec_section * section = NULL;
 	struct st_spec_property * prop = NULL;
-	char line[BUFSIZE], *p, *key, *value;
+	char *line, *p, *key, *value;
+	size_t linelen = 0;
 	int lineno;
 	FILE * stream;
 
@@ -302,7 +301,7 @@ __DDCFG_EXPORT__ int parse_spec(struct st_spec *spec)
 	lineno = 0;
 	stream = fmemopen(spec->contents, spec->length, "r");
 
-	while (fgets(line, BUFSIZE, stream)) {
+	while (getline(&line, &linelen, stream) != -1) {
 		lineno++;
 		p = line;
 		while (*p && isblank(*p)) p++;
@@ -337,5 +336,7 @@ __DDCFG_EXPORT__ int parse_spec(struct st_spec *spec)
 	}
 
 	fclose(stream);
+	if (line)
+		free(line);
 	return 0;
 }

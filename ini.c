@@ -1,5 +1,5 @@
 /*
- * Modified ini parser.
+ * Heavily modified ini parser.
  *
  * Original disclaimer:
 -----------------8<---------------
@@ -20,7 +20,6 @@
 
 #define MAX_SECTION 64
 #define MAX_NAME 64
-#define INI_MAX_LINE 512
 
 /* Strip whitespace chars off end of given string, in place. Return s. */
 static char *rstrip(char *s)
@@ -61,14 +60,17 @@ static char *strncpy0(char *dest, const char *src, size_t size)
 
 __DDCFG_EXPORT__ int ini_parse_file(FILE * file, int (*handler) (const char *, const char *, const char *))
 {
-	char line[INI_MAX_LINE];
+	char *line = NULL;
+	size_t linelen = 0;
+
 	char section[MAX_SECTION] = "";
 	char prev_name[MAX_NAME] = "";
 	char *start, *end, *name, *value;
 	int lineno = 0, error = 0;
 
 	/* Scan through file line by line */
-	while (fgets(line, INI_MAX_LINE, file) != NULL) {
+
+	while (getline(&line, &linelen, file) != -1) {
 		lineno++;
 		start = line;
 
@@ -114,5 +116,9 @@ __DDCFG_EXPORT__ int ini_parse_file(FILE * file, int (*handler) (const char *, c
 			}
 		}
 	}
+
+	if (line)
+		free(line);
+
 	return error;
 }
