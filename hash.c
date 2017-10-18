@@ -109,8 +109,8 @@ __DDCFG_EXPORT__ char **getall(void){
 	for (i = 0; i < HASHSIZE; i++) {
 		np = hashtab[i];
 		while (np != NULL) {
-			bufferlen = snprintf(NULL, 0, "%s = %s\n", np->key, np->value);
-			buffer = malloc(sizeof(char) * bufferlen);
+			bufferlen = 1+snprintf(NULL, 0, "%s = %s\n", np->key, np->value);
+			buffer = malloc(sizeof(char) * (bufferlen));
 			snprintf(buffer, bufferlen, "%s = %s\n", np->key, np->value);
 			items[iitem++] = buffer;
 			np = np->next;
