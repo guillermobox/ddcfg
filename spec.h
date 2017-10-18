@@ -7,7 +7,7 @@ enum section_type {PRIMARY = 0, SECONDARY};
 
 struct st_spec {
 	char * contents;
-	unsigned int length;
+	long int length;
 	struct st_spec_section *sections;
 };
 

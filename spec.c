@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "spec.h"
 
-char * property_strings[] = {"string", "int", "bool", "double", "subsection"};
+char * type_strings[] = {"string", "int", "bool", "double", "subsection"};
 char * section_strings[] = {"SECTION", "SUBSECTION"};
 
 static int set_property(struct st_spec_property *prop, char *key, char *value)
@@ -27,8 +27,8 @@ static int set_property(struct st_spec_property *prop, char *key, char *value)
 		prop->points_to = strdup(value);
 	} else if (strcmp(key, "TYPE") == 0) {
 		int i;
-		for (i=0; i < sizeof(property_strings) / sizeof(char*); i++) {
-			if (strcmp(value, property_strings[i]) == 0) {
+		for (i=0; i < sizeof(type_strings) / sizeof(char*); i++) {
+			if (strcmp(value, type_strings[i]) == 0) {
 				prop->type = i;
 			}
 		};
@@ -127,9 +127,9 @@ __DDCFG_EXPORT__ struct st_spec * new_spec_from_data(const char * data, int leng
 __DDCFG_EXPORT__ struct st_spec * new_spec_from_file(const char * path)
 {
 	struct st_spec * spec;
-	FILE * f;
-	char * contents;
-	int filesize;
+	FILE * f = NULL;
+	char * contents = NULL;
+	long int filesize = 0, readsize = 0;
 
 	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
 	spec->sections = NULL;
@@ -140,11 +140,14 @@ __DDCFG_EXPORT__ struct st_spec * new_spec_from_file(const char * path)
 		return NULL;
 	}
 
-	contents = calloc(1024 * 1024, sizeof(char));
+	fseek(f, 0, SEEK_END);
+	filesize = ftell(f);
+	fseek(f, 0, SEEK_SET);
 
-	filesize = fread(contents, sizeof(char), 1024 * 1024, f);
+	contents = malloc(filesize);
+	readsize = fread(contents, sizeof(char), filesize, f);
 
-	if (filesize == 1024 * 1024 || filesize == 0) {
+	if (readsize != filesize) {
 		free(contents);
 		return NULL;
 	}
