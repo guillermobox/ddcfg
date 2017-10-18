@@ -12,7 +12,7 @@ struct nlist {
 		long l_cache;
 	};
 };
-#define HASHSIZE 101
+#define HASHSIZE 1024*16
 
 __DDCFG_EXPORT__ struct nlist *lookup(const char *);
 __DDCFG_EXPORT__ struct nlist *install(const char *, const char *);
