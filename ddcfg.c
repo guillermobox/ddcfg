@@ -154,13 +154,13 @@ double ddcfg_double(const char *section, const char *option)
 
 	entry = ddcfg_lookup(section, option);
 
-	if (entry->cached == 1) {
+	if (entry->status & STATUS_CACHED) {
 		return entry->d_cache;
 	}
 	err = ddcfg_parse_double(entry->value, &number);
 	if (err)
 		die(section, option, "double", entry->value);
-	entry->cached = 1;
+	entry->status |= STATUS_CACHED;
 	entry->d_cache = number;
 	return number;
 };
@@ -183,13 +183,13 @@ int ddcfg_int(const char *section, const char *option)
 
 	entry = ddcfg_lookup(section, option);
 
-	if (entry->cached == 1) {
+	if (entry->status & STATUS_CACHED) {
 		return entry->i_cache;
 	}
 	err = ddcfg_parse_int(entry->value, &number);
 	if (err)
 		die(section, option, "int", entry->value);
-	entry->cached = 1;
+	entry->status |= STATUS_CACHED;
 	entry->i_cache = number;
 	return number;
 };
@@ -229,13 +229,13 @@ int ddcfg_bool(const char *section, const char *option)
 	int value, err;
 
 	entry = ddcfg_lookup(section, option);
-	if (entry->cached == 1) {
+	if (entry->status & STATUS_CACHED) {
 		return entry->i_cache;
 	}
 	err = ddcfg_parse_bool(entry->value, &value);
 	if (err)
 		die(section, option, "bool", entry->value);
-	entry->cached = 1;
+	entry->status |= STATUS_CACHED;
 	entry->i_cache = value;
 	return value;
 };

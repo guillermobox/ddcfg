@@ -1,11 +1,14 @@
 #ifndef __HASH_H__
 #define __HASH_H__
 
+#define STATUS_CACHED 0x01
+#define STATUS_CHECKED 0x02
+
 struct nlist {
 	struct nlist *next;
 	char *key;
 	char *value;
-	int cached;
+	int status;
 	union {
 		double d_cache;
 		int i_cache;
