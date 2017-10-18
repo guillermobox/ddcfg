@@ -55,12 +55,21 @@ static int strcomp(const void *p1, const void *p2)
 __DDCFG_EXPORT__ char **all_items(void)
 {
 	struct nlist *np;
-	int i, iitem;
+	int i, iitem, itemcount = 0;
 	char **items;
 
+	/* first count how many items we have in the db */
+	for (i = 0; i < HASHSIZE; i++) {
+		np = hashtab[i];
+		while (np != NULL) {
+			itemcount += 1;
+			np = np->next;
+		}
+	}
+
 	iitem = 0;
-	items = (char **) malloc(1024 * sizeof(char*));
-	for (i = 0; i < 1024; i++)
+	items = (char **) malloc((itemcount + 1) * sizeof(char*));
+	for (i = 0; i < itemcount + 1; i++)
 		items[i] = NULL;
 
 	for (i = 0; i < HASHSIZE; i++) {
@@ -78,20 +87,32 @@ __DDCFG_EXPORT__ char **all_items(void)
 /* get all the keys/values in a string */
 __DDCFG_EXPORT__ char **getall(void){
 	struct nlist *np;
-	int i, iitem;
+	int i, iitem, itemcount = 0;
 	char **items;
-	char buffer[128];
+	char *buffer;
+	size_t bufferlen;
+
+	/* first count how many items we have in the db */
+	for (i = 0; i < HASHSIZE; i++) {
+		np = hashtab[i];
+		while (np != NULL) {
+			itemcount += 1;
+			np = np->next;
+		}
+	}
 
 	iitem = 0;
-	items = malloc(1024 * sizeof(char*));
-	for (i = 0; i < 1024; i++)
+	items = malloc((itemcount + 1) * sizeof(char*));
+	for (i = 0; i < itemcount + 1; i++)
 		items[i] = NULL;
 
 	for (i = 0; i < HASHSIZE; i++) {
 		np = hashtab[i];
 		while (np != NULL) {
-			sprintf(buffer, "%s = %s\n", np->key, np->value);
-			items[iitem++] = strdup(buffer);
+			bufferlen = snprintf(NULL, 0, "%s = %s\n", np->key, np->value);
+			buffer = malloc(sizeof(char) * bufferlen);
+			snprintf(buffer, bufferlen, "%s = %s\n", np->key, np->value);
+			items[iitem++] = buffer;
 			np = np->next;
 		}
 	}

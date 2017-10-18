@@ -603,7 +603,6 @@ int ddcfg_check_spec()
 			fprintf(stderr, "spec:??:%s:Property not found in spec\n", items[i]);
 			err += 1;
 		}
-		free(items[i]);
 	}
 	free(items);
 
