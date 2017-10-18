@@ -11,6 +11,7 @@ static char *errorNotFound = "ddcfg:Error reading %s.%s: not found\n";
 static char *errorNotParse = "ddcfg:Error casting %s.%s to type %s: '%s' not parseable\n";
 static struct st_spec * spec = NULL;
 
+
 static void die(const char *section, const char *option, const char *cast,
 		const char *value)
 {
@@ -324,67 +325,11 @@ char * ddcfg_is_defined(const char *section, const char *option)
 		return NULL;
 };
 
-
+static int ddcfg_spec_check_type(struct st_spec_property *property, char * value);
+static int ddcfg_spec_internal_consistency(struct st_spec_section *section, struct st_spec_property *property);
 static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname);
-
-static int checked_list(const char * section, const char * property)
-{
-	static char ** list = NULL;
-	static int length = 0;
-
-	if (list == NULL) {
-		list = calloc(1024, sizeof(char*));
-	}
-
-	if (section == NULL && property == NULL) {
-		char **item, **items, **visited;
-		int found;
-		int errors = 0;
-		items = all_items();
-
-		item = items;
-		while (*item) {
-			found = 0;
-			visited = list;
-			while (*visited) {
-				if (strcmp(*visited, *item) == 0) {
-					found = 1;
-					break;
-				}
-				visited++;
-			};
-
-			if (found == 0) {
-				fprintf(stderr, "spec:??:%s:Property not found in spec\n", *item);
-				errors += 1;
-			};
-
-			item++;
-		};
-
-		free(items);
-
-		return errors;
-	} else {
-		list[length] = malloc(strlen(section) + strlen(property) + 2);
-		sprintf(list[length], "%s.%s", section, property);
-		length++;
-	}
-	return 0;
-};
-
-static int ddcfg_check_subsection(struct st_spec_section *section, const char *secname)
-{
-	struct st_spec_property * property;
-	int err = 0;
-
-	property = section->properties;
-	while (property) {
-		err += ddcfg_check_property(section, property, secname);
-		property = property->next;
-	};
-	return err;
-};
+static int ddcfg_check_subsection(struct st_spec_section *section, const char *secname);
+static int ddcfg_check_section(struct st_spec_section *section);
 
 static int ddcfg_spec_check_type(struct st_spec_property *property, char * value)
 {
@@ -496,7 +441,6 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 	if ((err = ddcfg_spec_internal_consistency(section, property)) != 0)
 		return err;
 
-	checked_list(secname, property->name);
 	value = ddcfg_is_defined(secname, property->name);
 
 	if (value == NULL) {
@@ -532,6 +476,10 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 			return 1;
 		}
 	}
+
+	/* Here we found the property in the database, set to checked */
+	struct nlist * item = ddcfg_lookup(section->name, property->name);
+	item->status |= STATUS_CHECKED;
 
 	if (property->type == INT) {
 		int tmp;
@@ -591,6 +539,20 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 	return 0;
 }
 
+static int ddcfg_check_subsection(struct st_spec_section *section, const char *secname)
+{
+	struct st_spec_property * property;
+	int err = 0;
+
+	property = section->properties;
+	while (property) {
+		err += ddcfg_check_property(section, property, secname);
+		property = property->next;
+	};
+	return err;
+};
+
+
 static int ddcfg_check_section(struct st_spec_section *section)
 {
 	struct st_spec_property * property;
@@ -622,6 +584,7 @@ int ddcfg_check_spec()
 	struct st_spec_section * section;
 	int err = 0;
 
+	/* check that the spec complies with the database */
 	section = spec->sections;
 	while (section) {
 		if (section->type == PRIMARY)
@@ -629,7 +592,20 @@ int ddcfg_check_spec()
 		section = section->next;
 	}
 
-	err += checked_list(NULL, NULL);
+	/* check that no other items in the database are unchecked */
+	char **items;
+	int i;
+	items = all_items();
+	for (i = 0; items[i] != NULL; i++) {
+		struct nlist * prop;
+		prop = lookup(items[i]);
+		if (prop && !(prop->status & STATUS_CHECKED)) {
+			fprintf(stderr, "spec:??:%s:Property not found in spec\n", items[i]);
+			err += 1;
+		}
+		free(items[i]);
+	}
+	free(items);
 
 	return err;
 };
