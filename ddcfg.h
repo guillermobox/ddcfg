@@ -51,6 +51,12 @@ int ddcfg_int(const char *section, const char *option);
 int ddcfg_bool(const char *section, const char *option);
 double ddcfg_double(const char *section, const char *option);
 
+/*
+ * This function adds a pair of key/value, usefull to update the database
+ * with extra keys.
+ */
+int ddcfg_set(const char *key, const char *value);
+
 /* This function will check the configuration of the database with a spec
  */
 /* Load a spec file and parse the contents into the spec tree.
