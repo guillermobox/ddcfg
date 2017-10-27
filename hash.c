@@ -34,7 +34,7 @@ __DDCFG_EXPORT__ struct nlist *install(const char *key, const char *value)
 	struct nlist *np;
 	unsigned hashval;
 	if ((np = lookup(key)) == NULL) {	/* not found */
-		np = (struct nlist *) malloc(sizeof(*np));
+		np = (struct nlist *) calloc(1, sizeof(*np));
 		if (np == NULL || (np->key = strdup(key)) == NULL)
 			return NULL;
 		hashval = hash(key);

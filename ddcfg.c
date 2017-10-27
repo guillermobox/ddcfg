@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <stdarg.h>
 #include "hash.h"
 #include "ini.h"
@@ -254,12 +255,13 @@ char ** ddcfg_parselist(const char *string, int *length)
 	ptr = (char *) stringcopy;
 	while (ptr) {
 		element = strsep(&ptr, ",");
-		while (*element == ' ')
+		while (isspace(*element))
 			element++;
 		chop = element;
 		while ((*chop) != '\0') chop++;
-		while ((*(--chop)) == ' ')
+		while (chop > element && isspace(*--chop)) {
 			*chop = '\0';
+		}
 		list[len] = strdup(element);
 		len += 1;
 	};
@@ -478,7 +480,7 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 	}
 
 	/* Here we found the property in the database, set to checked */
-	struct nlist * item = ddcfg_lookup(section->name, property->name);
+	struct nlist * item = ddcfg_lookup(secname, property->name);
 	item->status |= STATUS_CHECKED;
 
 	if (property->type == INT) {
@@ -512,7 +514,9 @@ static int ddcfg_check_property(struct st_spec_section *section, struct st_spec_
 			struct st_spec_section * remote;
 			remote = lookup_section(spec, property->points_to);
 			err = ddcfg_check_subsection(remote, sections[i]);
+			free(sections[i]);
 		};
+		free(sections);
 		return err;
 	};
 

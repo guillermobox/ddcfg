@@ -17,3 +17,9 @@ testdriver: testdriver.c ../ddcfg.a
 
 test_select: test_select.c ../ddcfg.a
 	$(CC) $^ -o $@
+
+test_configuration: test_configuration.c ../ddcfg.a
+	$(CC) $^ -o $@
+
+test_parsing: test_parsing.c ../ddcfg.a
+	$(CC) $^ -o $@

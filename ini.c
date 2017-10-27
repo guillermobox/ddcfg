@@ -50,7 +50,7 @@ __DDCFG_EXPORT__ int ini_parse_file(FILE * file, int (*handler) (const char *, c
 	char *line = NULL;
 	size_t linelen = 0;
 
-	char * section;
+	char * section = NULL;
 	char *start, *end, *name, *value;
 	int lineno = 0, error = 0;
 	size_t namelen;
@@ -67,6 +67,8 @@ __DDCFG_EXPORT__ int ini_parse_file(FILE * file, int (*handler) (const char *, c
 			if (*end == ']') {
 				*end = '\0';
 				namelen = (size_t) (end - start);
+				if (section)
+					free(section);
 				section = calloc(namelen + 1, sizeof(char));
 				strncpy(section, start + 1, namelen);
 			}
@@ -102,6 +104,8 @@ __DDCFG_EXPORT__ int ini_parse_file(FILE * file, int (*handler) (const char *, c
 
 	if (line)
 		free(line);
+	if (section)
+		free(section);
 
 	return error;
 }

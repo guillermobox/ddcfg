@@ -25,7 +25,7 @@ VALUES a,b,c
 
 PROPERTY d
 DEFAULT x
-VALUES a,  x  , c
+VALUES a,  x    , c
 
 PROPERTY e
 VALUES a, ,d

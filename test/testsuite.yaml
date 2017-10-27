@@ -6,14 +6,6 @@ tests:
     run    : ./testdriver unexistingfile.cfg
     return : 1
 
-  - name   : Passing
-    run    : ./testdriver Tests/pass.cfg
-    return : 0
-
-  - name   : SelectFunction
-    run    : ./test_select Tests/select.ini
-    return : 0
-
   - name   : ReadNormal
     run    : ./testdriver Tests/normal.ini
     return : 0
@@ -26,6 +18,28 @@ tests:
     run    : ./testdriver Tests/huge.ini
     return : 0
 
+  - name   : ParseDoubleNormal
+    run    : ./test_parsing Tests/numbers_normal.ini
+    return : 0
+
+  - name   : ParseDoubleLarge
+    run    : ./test_parsing Tests/numbers_large.ini
+    return : 0
+
+  - name   : ParseDoubleHuge
+    run    : ./test_parsing Tests/numbers_huge.ini
+    return : 0
+
   - name   : WrongSpec
     run    : ./testdriver Tests/empty.ini Tests/wrong.spec
     output : 13 errors found!
+
+  - name   : RightSpec
+    run    : ./testdriver Tests/right.ini Tests/right.spec
+    output : All clear
+    return : 0
+
+  - name   : SelectFunction
+    run    : ./test_select Tests/select.ini
+    return : 0
+

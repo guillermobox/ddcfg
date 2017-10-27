@@ -303,7 +303,7 @@ __DDCFG_EXPORT__ int parse_spec(struct st_spec *spec)
 	enum parser_status status;
 	struct st_spec_section * section = NULL;
 	struct st_spec_property * prop = NULL;
-	char *line, *p, *key, *value;
+	char *line = NULL, *p, *key, *value;
 	size_t linelen = 0;
 	int lineno;
 	FILE * stream;
