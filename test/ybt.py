@@ -2,6 +2,8 @@
 import yaml
 import subprocess
 import threading
+import tempfile
+import shutil
 import os
 import sys
 
@@ -47,24 +49,29 @@ class Suite(object):
         self.tests.append(Test(configuration))
 
     def runTests(self):
-        print '{0:=^80}'.format(self.name)
+
+        print '\033[7m{0:^39} {1:4} {2:4} {3:^30}\033[0m'.format('Test name','Stat','Valg','Message')
+
         for test in self.tests:
-            print '{0:^36}'.format(test.name),
             self.setup()
             err = test.run()
+            test.run_valgrind()
             if err:
                 self.failedTests.append(test)
             else:
                 self.completedTests.append(test)
-            test.show(err)
+            test.show()
             self.setdown()
+
         if len(self.failedTests) == 0:
-            print '{0:=^80}'.format('All tests completed successfully')
+            msg = 'All tests completed successfully'
         else:
             msg = 'Failed {0} tests of {1}'.format(len(self.failedTests), len(self.tests))
-            print '{0:=^80}'.format(msg)
-            for test in self.failedTests:
-                print self.name + '.' + test.name, test.showDiagnostics()
+
+        print '\033[7m{0:^80}\033[0m'.format(msg)
+
+        for test in self.failedTests:
+            print self.name + '.' + test.name, test.showDiagnostics()
 
     def setup(self):
         self.savedEnvironment = dict()
@@ -111,11 +118,21 @@ class Test(object):
         self.retval = config['return'] if 'return' in config else None
         self.timeout = int(config['timeout']) if 'timeout' in config else 10
 
-    def show(self, error):
-        if error:
-            print "\033[31mFAIL\033[0m {0:^35}".format(error)
+        self.abortmsg = None
+        self.valgrind = None
+
+    def show(self):
+        print '{0:39}'.format(self.name),
+
+        if self.abortmsg:
+            print "\033[7;31mFAIL\033[0m ---- {0}".format(self.abortmsg),
         else:
-            print "\033[32m OK \033[0m"
+            print "\033[32m OK \033[0m",
+            if self.valgrind:
+                print "\033[31mFAIL\033[0m {0} valgrind errors".format(self.valgrind),
+            else:
+                print "\033[32m OK \033[0m",
+        print
 
     def abort(self, msg, reason):
         self.abortmsg = msg
@@ -149,6 +166,37 @@ class Test(object):
             return self.abort("Wrong return value", FailureReason.RETURN)
 
         return None
+
+    def run_valgrind(self):
+        for command in self.setup:
+            if subprocess.call(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+                return self.abort("Setup failed", FailureReason.SETUP)
+
+        xmlfile = tempfile.NamedTemporaryFile()
+
+        valgrindstr="valgrind --error-exitcode=127 --xml-file="+xmlfile.name+" --xml=yes --leak-check=full";
+        self.process = subprocess.Popen("exec " + valgrindstr + " " + self.command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+
+        def target():
+            (stdout, stderr) = self.process.communicate(self.input)
+            self.runResults = (stdout, stderr)
+
+        thread = threading.Thread(target=target)
+        thread.start()
+
+        thread.join(self.timeout)
+        if thread.is_alive():
+            process.kill()
+            thread.join()
+            return self.abort("Timeout of %d seconds"%(self.timeout,), FailureReason.TIME)
+
+        from lxml import etree
+        tree = etree.parse(xmlfile)
+        errors = tree.xpath('/valgrindoutput/error')
+        if errors:
+            self.valgrind = len(errors)
+            shutil.copyfile(xmlfile.name, self.name + '.valgrind')
+        xmlfile.close()
 
     def showDiagnostics(self):
         if self.reason == FailureReason.OUTPUT:

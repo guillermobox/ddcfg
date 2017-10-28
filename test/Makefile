@@ -3,9 +3,9 @@ all: tests
 .PHONY: tests testdriver all clean
 
 clean:
-	$(RM) -f testdriver
+	$(RM) testdriver test_select test_configuration test_parsing
 
-tests: testdriver test_select
+tests: testdriver test_select test_configuration test_parsing
 	@echo
 	@echo Running tests
 	@echo
@@ -13,13 +13,13 @@ tests: testdriver test_select
 	@echo
 
 testdriver: testdriver.c ../ddcfg.a
-	$(CC) $^ -o $@
+	$(CC) -g $^ -o $@
 
 test_select: test_select.c ../ddcfg.a
-	$(CC) $^ -o $@
+	$(CC) -g $^ -o $@
 
 test_configuration: test_configuration.c ../ddcfg.a
-	$(CC) $^ -o $@
+	$(CC) -g $^ -o $@
 
 test_parsing: test_parsing.c ../ddcfg.a
-	$(CC) $^ -o $@
+	$(CC) -g $^ -o $@
