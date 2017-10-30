@@ -16,6 +16,7 @@ def readlist(dict, key):
     return ret
 
 class FailureReason:
+    PASS = 0
     SETUP = 1
     TIME  = 2
     OUTPUT = 3
@@ -50,7 +51,7 @@ class Suite(object):
 
     def runTests(self):
 
-        print '\033[7m{0:^39} {1:4} {2:4} {3:^30}\033[0m'.format('Test name','Stat','Valg','Message')
+        print '\033[7m{0:^39} {1:4} {2:4} {3:^30}\033[0m'.format('Test name','Test','Valg','Message')
 
         for test in self.tests:
             self.setup()
@@ -60,7 +61,7 @@ class Suite(object):
                 self.failedTests.append(test)
             else:
                 self.completedTests.append(test)
-            test.show()
+            self.show_test_results(test)
             self.setdown()
 
         if len(self.failedTests) == 0:
@@ -72,6 +73,20 @@ class Suite(object):
 
         for test in self.failedTests:
             print self.name + '.' + test.name, test.showDiagnostics()
+
+    def show_test_results(self, test):
+        print '{0:39}'.format(test.name),
+
+        if test.abortmsg:
+            print "\033[7;31mFAIL\033[0m ---- {0}".format(test.abortmsg),
+        else:
+            print "\033[32m OK \033[0m",
+            if test.valgrind:
+                print "\033[31mFAIL\033[0m {0} valgrind errors".format(test.valgrind),
+            else:
+                print "\033[32m OK \033[0m",
+        print
+
 
     def setup(self):
         self.savedEnvironment = dict()
@@ -120,19 +135,6 @@ class Test(object):
 
         self.abortmsg = None
         self.valgrind = None
-
-    def show(self):
-        print '{0:39}'.format(self.name),
-
-        if self.abortmsg:
-            print "\033[7;31mFAIL\033[0m ---- {0}".format(self.abortmsg),
-        else:
-            print "\033[32m OK \033[0m",
-            if self.valgrind:
-                print "\033[31mFAIL\033[0m {0} valgrind errors".format(self.valgrind),
-            else:
-                print "\033[32m OK \033[0m",
-        print
 
     def abort(self, msg, reason):
         self.abortmsg = msg
