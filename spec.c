@@ -77,7 +77,7 @@ static int set_section(struct st_spec_section *section, char *key, char *value)
 	return 0;
 };
 
-static struct st_spec_property * new_property(struct st_spec_section *section)
+static struct st_spec_property * new_property(struct st_spec_section *section, const char * name)
 {
 	struct st_spec_property * prop;
 	prop = section->properties;
@@ -87,19 +87,29 @@ static struct st_spec_property * new_property(struct st_spec_section *section)
 		prop = section->properties;
 		bzero(prop, sizeof(struct st_spec_property));
 		prop->section = section;
+		prop->name = strdup(name);
 		return prop;
 	};
 
-	while (prop->next != NULL)
+	while (prop->next != NULL) {
+		if (strcmp(prop->name, name) == 0) {
+			return NULL;
+		}
 		prop = prop->next;
+	}
+
+	if (strcmp(prop->name, name) == 0) {
+		return NULL;
+	}
 
 	prop->next = (struct st_spec_property *) malloc(sizeof(struct st_spec_property));
 	bzero(prop->next, sizeof(struct st_spec_property));
 	prop->next->section = section;
+	prop->next->name = strdup(name);
 	return prop->next;
 };
 
-static struct st_spec_section * new_section(struct st_spec *spec)
+static struct st_spec_section * new_section(struct st_spec *spec, const char * name)
 {
 	struct st_spec_section * psec;
 
@@ -110,15 +120,24 @@ static struct st_spec_section * new_section(struct st_spec *spec)
 		spec->sections = psec;
 		bzero(psec, sizeof(struct st_spec_section));
 		psec->spec = spec;
+		psec->name = strdup(name);
 		return psec;
 	}
 
-	while (psec->next != NULL)
+	while (psec->next != NULL) {
+		if (strcmp(psec->name, name) == 0)
+			return NULL;
 		psec = psec->next;
+	}
+
+	if (strcmp(psec->name, name) == 0) {
+		return NULL;
+	}
 
 	psec->next = (struct st_spec_section *) malloc(sizeof(struct st_spec_section));
 	bzero(psec->next, sizeof(struct st_spec_section));
 	psec->next->spec = spec;
+	psec->next->name = strdup(name);
 	return psec->next;
 };
 
@@ -323,15 +342,18 @@ __DDCFG_EXPORT__ int parse_spec(struct st_spec *spec)
 		value = strtok(NULL, "\n");
 
 		if (is_section(key)) {
-			section = new_section(spec);
+			section = new_section(spec, value);
+			if (section == NULL)
+				return lineno;
 			if (set_section(section, "TYPE", key)) return lineno;
-			if (set_section(section, "NAME", value)) return lineno;
 			section->specline = lineno;
 			status = ONSECTION;
 			continue;
 		} else if (is_property(key)) {
-			prop = new_property(section);
-			if (set_property(prop, "NAME", value)) return lineno;
+			prop = new_property(section, value);
+			if (prop == NULL) {
+				return lineno;
+			}
 			prop->specline = lineno;
 			status = ONPROPERTY;
 			continue;
