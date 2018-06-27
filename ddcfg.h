@@ -51,6 +51,10 @@ int ddcfg_int(const char *section, const char *option);
 int ddcfg_bool(const char *section, const char *option);
 double ddcfg_double(const char *section, const char *option);
 
+/* This are the same functions but for fortran binding in F77 */
+int ddcfg_int_(const char *section, const char *option, long int slen, long int olen);
+int ddcfg_bool_(const char *section, const char *option, long int slen, long int olen);
+double ddcfg_double_(const char *section, const char *option, long int slen, long int olen);
 /*
  * This function adds a pair of key/value, usefull to update the database
  * with extra keys.

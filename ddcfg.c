@@ -148,6 +148,29 @@ static int ddcfg_parse_double(const char *string, double *value)
 	return 0;
 };
 
+double ddcfg_double_(const char *section, const char *option, long int slen, long int olen)
+{
+	char *newsection, *newoption;
+	double val;
+
+	newsection = (char*) malloc(slen+1);
+	newoption = (char*) malloc(olen+1);
+
+	strncpy(newsection, section, slen);
+	strncpy(newoption, option, olen);
+
+	newsection[slen] = '\0';
+	newoption[olen] = '\0';
+
+	val = ddcfg_double(newsection, newoption);
+
+	free(newsection);
+	free(newoption);
+
+	return val;
+};
+
+
 double ddcfg_double(const char *section, const char *option)
 {
 	struct nlist * entry;
@@ -175,6 +198,28 @@ static int ddcfg_parse_int(const char *string, int *value)
 	if (ptr == string || *ptr != '\0')
 		return 1;
 	return 0;
+};
+
+int ddcfg_int_(const char *section, const char *option, long int slen, long int olen)
+{
+	char *newsection, *newoption;
+	int val;
+
+	newsection = (char*) malloc(slen+1);
+	newoption = (char*) malloc(olen+1);
+
+	strncpy(newsection, section, slen);
+	strncpy(newoption, option, olen);
+
+	newsection[slen] = '\0';
+	newoption[olen] = '\0';
+
+	val = ddcfg_int(newsection, newoption);
+
+	free(newsection);
+	free(newoption);
+
+	return val;
 };
 
 int ddcfg_int(const char *section, const char *option)
@@ -223,6 +268,28 @@ static int ddcfg_parse_bool(const char *string, int *value)
 
 	free(lower);
 	return 0;
+};
+
+int ddcfg_bool_(const char *section, const char *option, long int slen, long int olen)
+{
+	char *newsection, *newoption;
+	int val;
+
+	newsection = (char*) malloc(slen+1);
+	newoption = (char*) malloc(olen+1);
+
+	strncpy(newsection, section, slen);
+	strncpy(newoption, option, olen);
+
+	newsection[slen] = '\0';
+	newoption[olen] = '\0';
+
+	val = ddcfg_bool(newsection, newoption);
+
+	free(newsection);
+	free(newoption);
+
+	return val;
 };
 
 int ddcfg_bool(const char *section, const char *option)
