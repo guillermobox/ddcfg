@@ -34,11 +34,46 @@ main()
 %}
 
 %token LITERAL SECTION SECMARKER DESCRIPTION PROPERTY KEY HALFNAME TYPE TYPETOKEN
+%token FAILURE WARNING CONDITION INTEGER FLOAT OP
 
 %%
-spec: newsection description properties {
-    printf("SPEC finished!\n");
+spec:
+    | section spec 
+    | failure spec
+    | warning spec
+
+section: newsection description properties {
+    less();
 }
+
+warning: newwarning description condition {
+    less();
+}
+
+failure: newfailure description condition {
+    less();
+}
+
+newfailure: FAILURE {
+    printf("Failure...\n");
+    more();
+}
+
+newwarning: WARNING {
+    printf("Warning...\n");
+    more();
+}
+
+condition: CONDITION expr {
+    print("Condition was parsed fine");
+}
+
+expr
+    : KEY
+    | INTEGER
+    | FLOAT
+    | '(' expr ')'
+    | expr OP expr
 
 properties
     : property

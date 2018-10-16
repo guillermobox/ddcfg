@@ -4,7 +4,13 @@
 #include "y.tab.h"
 extern char * yylval;
 %}
-%x literal type key halfname
+%x literal type key halfname expresion
+
+
+N [0-9]
+INT {N}+
+FLOAT {INT}\.{INT}?
+OPERATION (OR|AND|<|>)
 
 HALFNAME [a-zA-Z0-9_]+
 FULLNAME {HALFNAME}\.{HALFNAME}
@@ -24,6 +30,16 @@ SUBSECTION|SECTION {
     return SECTION;
 }
 
+FAILURE {
+    return FAILURE;
+}
+WARNING {
+    return WARNING;
+}
+CONDITION {
+    BEGIN(expresion);
+    return CONDITION;
+}
 PROPERTY {
     BEGIN(halfname);
     return PROPERTY;
@@ -57,4 +73,35 @@ DESCRIPTION {
 }
 }
 
+<expresion>{
+[ \t]+ ;
+
+{INT} {
+    yylval = strdup(yytext);
+    return INTEGER;
+}
+
+{FLOAT} {
+    yylval = strdup(yytext);
+    return FLOAT;
+}
+
+{OPERATION} {
+    yylval = strdup(yytext);
+
+    return OP;
+}
+
+{FULLNAME} {
+    yylval = strdup(yytext);
+
+    return KEY;
+}
+
+[(] { return '('; }
+[)] { return ')'; }
+\n {
+    BEGIN(INITIAL);
+}
+}
 %%
