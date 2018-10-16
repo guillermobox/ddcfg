@@ -5,6 +5,7 @@ SECTION Device
 PROPERTY workfunction
 	TYPE double
 	DESCRIPTION Value in eV of the workfunction to use
+	DESCRIPTION can be overwritten by another one
 PROPERTY mesh_basename
 	TYPE string
 	DESCRIPTION The basename of the path of the mesh, up to the process number

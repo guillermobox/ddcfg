@@ -1,8 +1,7 @@
 %option noyywrap
 %{
 #include <stdio.h>
-#include "y.tab.h"
-extern char * yylval;
+#include "expparser.tab.h"
 %}
 %x literal type key halfname expresion
 
@@ -10,7 +9,7 @@ extern char * yylval;
 N [0-9]
 INT {N}+
 FLOAT {INT}\.{INT}?
-OPERATION (OR|AND|<|>)
+OPERATION (OR|AND|<|>|[+]|[*]|-)
 
 HALFNAME [a-zA-Z0-9_]+
 FULLNAME {HALFNAME}\.{HALFNAME}
@@ -51,12 +50,12 @@ DESCRIPTION {
 }
 
 <literal>[ \t]+ ;
-<literal>[^ \t\n]+.* {BEGIN(INITIAL);yylval=strdup(yytext);return LITERAL;}
+<literal>[^ \t\n]+.* {BEGIN(INITIAL);yylval.string=strdup(yytext);return LITERAL;}
 
 <type>{
     [ \t]+ ;
 {TYPE} {
-    yylval=strdup(yytext);
+    yylval.string=strdup(yytext);
     return TYPETOKEN;
 }
 \n {
@@ -68,7 +67,7 @@ DESCRIPTION {
 [ \t]+ ;
 {HALFNAME} {
     BEGIN(INITIAL);
-    yylval=strdup(yytext);
+    yylval.string=strdup(yytext);
     return HALFNAME;
 }
 }
@@ -77,23 +76,23 @@ DESCRIPTION {
 [ \t]+ ;
 
 {INT} {
-    yylval = strdup(yytext);
+    yylval.integer = atoi(yytext);
     return INTEGER;
 }
 
 {FLOAT} {
-    yylval = strdup(yytext);
+    yylval.floating = strtod(yytext, NULL);
     return FLOAT;
 }
 
 {OPERATION} {
-    yylval = strdup(yytext);
+    yylval.string = strdup(yytext);
 
     return OP;
 }
 
 {FULLNAME} {
-    yylval = strdup(yytext);
+    yylval.string = strdup(yytext);
 
     return KEY;
 }
@@ -104,4 +103,5 @@ DESCRIPTION {
     BEGIN(INITIAL);
 }
 }
+
 %%
