@@ -6,3 +6,9 @@ tags
 *.a
 main
 wizard
+*.tab.c
+*.tab.h
+*.yy.c
+a.out
+expparser
+gmon.out

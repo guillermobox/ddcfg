@@ -219,52 +219,7 @@ __DDCFG_EXPORT__ void free_spec(struct st_spec * spec)
 	free(spec);
 };
 
-/*
-static void print_property(struct st_spec_property * prop)
-{
-	printf("PROPERTY %s\n", prop->name);
-	printf("\tDESCRIPTION %s\n", prop->description);
-	if (prop->type >= 0)
-		printf("\tTYPE %s\n", property_strings[prop->type]);
-	if (prop->defaultvalue)
-		printf("\tDEFAULT %s\n", prop->defaultvalue);
-	if (prop->depends_on)
-		printf("\tDEPENDS_ON %s\n", prop->depends_on);
-	if (prop->points_to)
-		printf("\tPOINTS_TO %s\n", prop->points_to);
-	if (prop->values)
-		printf("\tVALUES %s\n", prop->values);
-	printf("\n");
-};
 
-static void print_section(struct st_spec_section *section)
-{
-	struct st_spec_property * prop;
-	if (section->type == PRIMARY)
-		printf("SECTION %s\n", section->name);
-	else if (section->type == SECONDARY)
-		printf("SUBSECTION %s\n", section->name);
-	printf("\tDESCRIPTION %s\n", section->description);
-	printf("\n");
-	prop = section->properties;
-	while (prop) {
-		print_property(prop);
-		prop = prop->next;
-	}
-};
-
-static void print_spec(struct st_spec *spec, const char * header)
-{
-	struct st_spec_section * section;
-	printf("%s\n", header);
-	section = spec->sections;
-	while (section) {
-		print_section(section);
-		section = section->next;
-	}
-	printf("%s\n", header);
-};
-*/
 
 static int is_section(char *key)
 {
