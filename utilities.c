@@ -5,6 +5,42 @@
 
 #include "utilities.h"
 
+/* A stack of void pointers */
+Stack stack_new(size_t initialsize)
+{
+    Stack s = (Stack) malloc(sizeof(*s));
+    if (initialsize <= 0)
+        initialsize = 256;
+    s->allocated = initialsize;
+    s->used = 0;
+    s->buffer = (void**) malloc(sizeof(void*) * s->allocated);
+    return s;
+}
+
+void stack_push(Stack s, void * p)
+{
+    if (s->used == s->allocated) {
+        s->allocated *= 2;
+        s->buffer = (void **) realloc(s->buffer, sizeof(void*) * s->allocated);
+    }
+    s->buffer[s->used] = p;
+    s->used += 1;
+}
+
+void* stack_pop(Stack s)
+{
+    if (s->used == 0)
+        return NULL;
+    s->used -= 1;
+    return s->buffer[s->used];
+}
+
+void stack_free(Stack s)
+{
+    free(s->buffer);
+}
+
+/* String is a growable string */
 String string_new_empty()
 {
     String s = (String) malloc(sizeof(*s));

@@ -18,28 +18,28 @@
 #endif
 
 #include "ast.h"
-
-enum parser_status {NONE, ONSECTION, ONPROPERTY};
-enum property_type {STRING = 0, INT, BOOL, DOUBLE, SUBSECTION};
-enum section_type {PRIMARY = 0, SECONDARY};
-enum constraint_type {CSTFAILURE = 0, CSTWARNING};
+#include "expparser.tab.h"
 
 struct st_spec {
 	char * contents;
 	long int length;
 	struct st_spec_section *sections;
+	struct st_spec_constraint * constraints;
 };
 
 struct st_spec_constraint {
 	char * description;
-	enum constraint_type type;
+	enum yytokentype type;
+	const char * expression;
 	struct st_ast * ast;
+	struct st_spec * spec;
+	struct st_spec_constraint * next;
 };
 
 struct st_spec_section {
 	char * name;
 	char * description;
-	enum section_type type;
+	enum yytokentype type;
 	struct st_spec * spec;
 	struct st_spec_section * next;
 	struct st_spec_property * properties;
@@ -48,15 +48,13 @@ struct st_spec_section {
 struct st_spec_property {
 	char * name;
 	char * description;
-	enum property_type type;
-	
-//	char * depends_on;
-//	char * points_to;
-	
+	enum yytokentype type;
+
 	char * values;
 	char * defaultvalue;
-	
 
+	struct st_spec_property * depends_on;
+	struct st_spec_property * points_to;
 	struct st_spec_property * next;
 	struct st_spec_section * section;
 };

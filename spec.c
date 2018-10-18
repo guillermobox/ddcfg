@@ -4,11 +4,8 @@
 #include <ctype.h>
 #include "spec.h"
 
-<<<<<<< HEAD
-char * type_strings[] = {"string", "int", "bool", "double", "subsection"};
-=======
+
 char * property_strings[] = {"string", "int", "bool", "double", "subsection", "path"};
->>>>>>> Add support for path in spec interface
 char * section_strings[] = {"SECTION", "SUBSECTION"};
 
 static int set_property(struct st_spec_property *prop, char *key, char *value)
@@ -171,72 +168,16 @@ __DDCFG_EXPORT__ struct st_spec * new_spec_from_file(const char * path)
 		return NULL;
 	}
 
-	fseek(f, 0, SEEK_END);
-	filesize = ftell(f);
-	fseek(f, 0, SEEK_SET);
-
-	contents = malloc(filesize);
-	readsize = fread(contents, sizeof(char), filesize, f);
-
-	if (readsize != filesize) {
-		free(contents);
-		return NULL;
-	}
-	fclose(f);
-
 	spec->contents = contents;
 	spec->length = filesize;
-
 	return spec;
-};
-
-static void free_property(struct st_spec_property *prop)
-{
-	if (prop->name) free(prop->name);
-	if (prop->description) free(prop->description);
-	if (prop->depends_on) free(prop->depends_on);
-	if (prop->points_to) free(prop->points_to);
-	if (prop->values) free(prop->values);
-	if (prop->defaultvalue) free(prop->defaultvalue);
-	if (prop->next) free_property(prop->next);
-	free(prop);
-};
-
-static void free_section(struct st_spec_section * sec)
-{
-	if (sec->name) free(sec->name);
-	if (sec->description) free(sec->description);
-	if (sec->properties)
-		free_property(sec->properties);
-	if (sec->next) free_section(sec->next);
-	free(sec);
 };
 
 __DDCFG_EXPORT__ void free_spec(struct st_spec * spec)
 {
 	if (spec->contents) free(spec->contents);
-	free_section(spec->sections);
 	free(spec);
 };
-
-
-
-static int is_section(char *key)
-{
-	int i;
-	for (i = 0; i < sizeof(section_strings) / sizeof(char*); i++) {
-		if (strcmp(key, section_strings[i]) == 0)
-			return 1;
-	}
-	return 0;
-};
-
-static int is_property(char *key)
-{
-	if (strcmp(key, "PROPERTY") == 0)
-		return 1;
-	return 0;
-}
 
 __DDCFG_EXPORT__ struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname)
 {
@@ -275,60 +216,3 @@ __DDCFG_EXPORT__ void dump_spec(struct st_spec *spec)
 {
 	printf("%s", spec->contents);
 };
-	
-__DDCFG_EXPORT__ int parse_spec(struct st_spec *spec)
-{
-	enum parser_status status;
-	struct st_spec_section * section = NULL;
-	struct st_spec_property * prop = NULL;
-	char *line = NULL, *p, *key, *value;
-	size_t linelen = 0;
-	int lineno;
-	FILE * stream;
-
-	status = NONE;
-	lineno = 0;
-	stream = fmemopen(spec->contents, spec->length, "r");
-
-	while (getline(&line, &linelen, stream) != -1) {
-		lineno++;
-		p = line;
-		while (*p && isblank(*p)) p++;
-		if (*p == '#' || *p == '\n')
-			continue;
-
-		key = strtok(p, " ");
-		value = strtok(NULL, "\n");
-
-		if (is_section(key)) {
-			section = new_section(spec, value);
-			if (section == NULL)
-				return lineno;
-			if (set_section(section, "TYPE", key)) return lineno;
-			section->specline = lineno;
-			status = ONSECTION;
-			continue;
-		} else if (is_property(key)) {
-			prop = new_property(section, value);
-			if (prop == NULL) {
-				return lineno;
-			}
-			prop->specline = lineno;
-			status = ONPROPERTY;
-			continue;
-		};
-
-		if (status == ONPROPERTY) {
-			if (set_property(prop, key, value)) return lineno;
-		} else if (status == ONSECTION) {
-			if (set_section(section, key, value)) return lineno;
-		} else {
-			return lineno;
-		}
-	}
-
-	fclose(stream);
-	if (line)
-		free(line);
-	return 0;
-}

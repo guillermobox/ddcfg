@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include "expparser.tab.h"
 %}
-%x literal type key halfname expresion
+%option yylineno
 
+%x literal type key halfname expresion literalexpresion fullname
 
 N [0-9]
 INT {N}+
@@ -13,95 +14,119 @@ OPERATION (OR|AND|<|>|[+]|[*]|-)
 
 HALFNAME [a-zA-Z0-9_]+
 FULLNAME {HALFNAME}\.{HALFNAME}
-TYPE (int|double|bool|string|subsection)
+TYPE (integer|real|boolean|string|subsection)
 %%
 
-[ \t\n]+ ;
-^#.* ;
+[ \t\n]+ ; /* skip empty lines and also space at the begining of line */
+^#.* ; /* skip comments */
+
+    /* possible keywords to have at the begining of each line */
 TYPE {
     BEGIN(type);
-    return TYPE;
+    return T_TYPE;
 }
-DEPENDS_ON {printf("(%s)", yytext); BEGIN(key);}
-
+DEPENDS_ON {
+    BEGIN(fullname);
+    return T_DEPENDS_ON;
+}
+POINTS_TO {
+    BEGIN(fullname);
+    return T_POINTS_TO;
+}
 SUBSECTION|SECTION {
     BEGIN(halfname);
-    return SECTION;
+    return T_SECTION;
 }
-
 FAILURE {
-    return FAILURE;
+    return T_FAILURE;
 }
 WARNING {
-    return WARNING;
+    return T_WARNING;
 }
 CONDITION {
-    BEGIN(expresion);
-    return CONDITION;
+    BEGIN(literalexpresion);
+    return T_CONDITION;
 }
 PROPERTY {
     BEGIN(halfname);
-    return PROPERTY;
+    return T_PROPERTY;
 }
-
 DESCRIPTION {
     BEGIN(literal);
-    return DESCRIPTION;
+    return T_DESCRIPTION;
 }
-
 <literal>[ \t]+ ;
-<literal>[^ \t\n]+.* {BEGIN(INITIAL);yylval.string=strdup(yytext);return LITERAL;}
+<literal>[^ \t\n]+.* {BEGIN(INITIAL);yylval.string=strdup(yytext);return T_LITERAL;}
 
 <type>{
     [ \t]+ ;
-{TYPE} {
-    yylval.string=strdup(yytext);
-    return TYPETOKEN;
+    "integer"    {yylval.token = T_TYPE_INTEGER; return T_TYPETOKEN;}
+    "real"       {yylval.token = T_TYPE_REAL; return T_TYPETOKEN;}
+    "boolean"    {yylval.token = T_TYPE_BOOLEAN; return T_TYPETOKEN;}
+    "string"     {yylval.token = T_TYPE_STRING; return T_TYPETOKEN;}
+    "subsection" {yylval.token = T_TYPE_SUBSECTION; return T_TYPETOKEN;}
+    \n {
+        BEGIN(INITIAL);
+    }
 }
-\n {
-    BEGIN(INITIAL);
-}
+
+<fullname>{
+    [ \t]+ ;
+    {FULLNAME} {
+        BEGIN(INITIAL);
+        yylval.string = strdup(yytext);
+        return T_FULLNAME;
+    }
 }
 
 <halfname>{
-[ \t]+ ;
-{HALFNAME} {
-    BEGIN(INITIAL);
-    yylval.string=strdup(yytext);
-    return HALFNAME;
+    [ \t]+ ;
+    {HALFNAME} {
+        BEGIN(INITIAL);
+        yylval.string=strdup(yytext);
+        return T_HALFNAME;
+    }
 }
+
+<literalexpresion>{ 
+    [ \t]+ {;}
+    [^ \t].+ {
+        yylval.string = strdup(yytext);
+        yyless(0);
+        BEGIN(expresion);
+        return T_LITERAL;
+    }
 }
 
 <expresion>{
-[ \t]+ ;
+    [ \t]+ {;}
+    {INT} {
+        yylval.integer = atoi(yytext);
+        return T_INTEGER;
+    }
 
-{INT} {
-    yylval.integer = atoi(yytext);
-    return INTEGER;
-}
+    {FLOAT} {
+        yylval.floating = strtod(yytext, NULL);
+        return T_FLOAT;
+    }
 
-{FLOAT} {
-    yylval.floating = strtod(yytext, NULL);
-    return FLOAT;
-}
+    {OPERATION} {
+        yylval.string = strdup(yytext);
 
-{OPERATION} {
-    yylval.string = strdup(yytext);
+        return T_OP;
+    }
 
-    return OP;
-}
+    {FULLNAME} {
+        yylval.string = strdup(yytext);
 
-{FULLNAME} {
-    yylval.string = strdup(yytext);
+        return T_KEY;
+    }
 
-    return KEY;
-}
-
-[(] { return '('; }
-[)] { return ')'; }
-\n {
-    BEGIN(INITIAL);
-}
+    [(] { return '('; }
+    [)] { return ')'; }
+    \n {
+        BEGIN(INITIAL);
+    }
 }
 
 %%
