@@ -155,7 +155,8 @@ int yywrap()
     return 1;
 } 
 
-void print_property(struct st_spec_property *prop) {
+void print_property(struct st_spec_property *prop)
+{
     if (prop != NULL) {
         const char * type;
         if (prop->type == T_TYPE_INTEGER) {
@@ -165,8 +166,9 @@ void print_property(struct st_spec_property *prop) {
         } else if (prop->type == T_TYPE_BOOLEAN) {
             type = "boolean";
         } else if (prop->type == T_TYPE_STRING) {
-            type = "string";
+            type = "char* ";
         } 
+
         printf("    %s <%s> (%s)\n", prop->name, type, prop->description);
         if (prop->depends_on) {
             printf("        depending on this: %s.%s\n",
@@ -177,13 +179,19 @@ void print_property(struct st_spec_property *prop) {
         print_property(prop->next);
     }
 }
-void print_section(struct st_spec_section *sec) {
+
+void print_section(struct st_spec_section *sec)
+{
+
     printf("\n\033[;1mSection: %s\033[0m (%s)\n", sec->name, sec->description);
     print_property(sec->properties);
+
     if (sec->next)
         print_section(sec->next);
 }
-void print_constraint(struct st_spec_constraint *cons) {
+
+void print_constraint(struct st_spec_constraint *cons)
+{
     const char * type;
     if (cons == NULL) {
         printf("\nEND!\n");
@@ -194,6 +202,72 @@ void print_constraint(struct st_spec_constraint *cons) {
     printf("\n\033[;1mConstraint: %s\033[0m (%s)\n", type, cons->description);
     printf("     ast: %s\n", cons->expression);
     print_constraint(cons->next);
+}
+
+void structure_property(struct st_spec_property *prop) 
+{
+        if (prop != NULL) {
+        const char * type;
+        if (prop->type == T_TYPE_INTEGER) {
+            type = "int";
+        } else if (prop->type == T_TYPE_REAL) {
+            type = "double";
+        } else if (prop->type == T_TYPE_BOOLEAN) {
+            type = "int";
+        } else if (prop->type == T_TYPE_STRING) {
+            type = "char* ";
+        } 
+        printf("        %s %s; /*!< %s */\n", type, prop->name, prop->description);
+        structure_property(prop->next);
+    }
+}
+
+void structure_section(struct st_spec_section *sec)
+{
+    printf("\nstruct ddcfg_database {\n");
+    while (sec) {
+        printf("    struct {\n");
+        structure_property(sec->properties);
+        printf("    } %s; /*!< %s */\n", sec->name, sec->description);
+        sec = sec->next;
+    }
+    printf("} database;\n\n");
+}
+
+void load_structure_property(struct st_spec_property *prop)
+{
+    const char *sec, *pro, *command;
+    sec = prop->section->name;
+    pro = prop->name;
+    switch(prop->type) {
+        case T_TYPE_INTEGER: command = "ddcfg_int"; break;
+        case T_TYPE_REAL:    command = "ddcfg_double"; break;
+        case T_TYPE_BOOLEAN: command = "ddcfg_bool"; break;
+        case T_TYPE_STRING:  command = "ddcfg_get"; break;
+        default: break;
+    }
+    printf("    database.%s.%s = %s(\"%s\", \"%s\");\n", sec, pro, command, sec, pro);
+}
+
+void load_structure_section(struct st_spec_section *sec)
+{
+    struct st_spec_property *prop = sec->properties;
+    while (prop) {
+        load_structure_property(prop);
+        prop = prop->next;
+    }
+}
+
+void load_structures(struct st_spec * spec)
+{
+    struct st_spec_section * sec = spec->sections;
+
+    printf("void freeze_database()\n{\n");
+    while (sec) {
+        load_structure_section(sec);
+        sec = sec->next;
+    }
+    printf("}\n");
 }
 
 int main(int argc, char *argv[])
@@ -222,7 +296,8 @@ int main(int argc, char *argv[])
         printf("Boolean: %s\n", result.boolean? "true" : "false");
     } 
 
-
+    structure_section(spec->sections);
+    load_structures(spec);
     return 0;
 } 
 
