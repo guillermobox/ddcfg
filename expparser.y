@@ -166,7 +166,7 @@ void print_property(struct st_spec_property *prop)
         } else if (prop->type == T_TYPE_BOOLEAN) {
             type = "boolean";
         } else if (prop->type == T_TYPE_STRING) {
-            type = "char* ";
+            type = "string";
         } 
 
         printf("    %s <%s> (%s)\n", prop->name, type, prop->description);
@@ -285,19 +285,7 @@ int main(int argc, char *argv[])
 
     print_section(spec->sections);
     print_constraint(spec->constraints);
-    struct st_ast_value result = evaluate(spec->constraints->ast);
-    
-    printf("The expresion %s evaluated is... ", spec->constraints->expression);
-    if (result.type == T_TYPE_INTEGER) {
-        printf("Integer: %d\n", result.integer);
-    } else if (result.type == T_TYPE_REAL) {
-        printf("Real: %lf\n", result.real);
-    } else if (result.type == T_TYPE_BOOLEAN) {
-        printf("Boolean: %s\n", result.boolean? "true" : "false");
-    } 
 
-    structure_section(spec->sections);
-    load_structures(spec);
     return 0;
 } 
 
