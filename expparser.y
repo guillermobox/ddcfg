@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 %token T_SECTION T_SECMARKER T_DESCRIPTION T_PROPERTY T_TYPE
 %token T_FAILURE T_WARNING T_CONDITION T_DEPENDS_ON T_POINTS_TO
 %token <token> T_TYPETOKEN T_TYPE_INTEGER T_TYPE_REAL T_TYPE_BOOLEAN T_TYPE_STRING T_TYPE_SUBSECTION
-%token <string> T_HALFNAME T_FULLNAME T_LITERAL T_KEY T_OP
+%token <string> T_HALFNAME T_FULLNAME T_LITERAL T_KEY T_OP T_MONOOP
 %token <integer> T_INTEGER
 %token <floating> T_REAL
 %type <ast> expr
@@ -374,6 +374,10 @@ expr: T_REAL
 expr: '(' expr ')'
 {
     $$ = $2;
+};
+expr: T_MONOOP expr
+{
+    $$ = newnode($1[0], $2, NULL);
 };
 expr: expr T_OP expr
 {

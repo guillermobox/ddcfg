@@ -11,6 +11,7 @@ N [0-9]
 INT {N}+
 FLOAT {INT}\.{INT}?
 OPERATION (OR|AND|<|>|[+]|[*]|-)
+MONOOPERATION (NOT)
 
 HALFNAME [a-zA-Z0-9_]+
 FULLNAME {HALFNAME}\.{HALFNAME}
@@ -113,6 +114,11 @@ DESCRIPTION {
     {OPERATION} {
         yylval.string = strdup(yytext);
         return T_OP;
+    }
+
+    {MONOOPERATION} {
+        yylval.string = strdup(yytext);
+        return T_MONOOP;
     }
 
     {FULLNAME} {

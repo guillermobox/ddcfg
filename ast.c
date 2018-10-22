@@ -30,7 +30,7 @@ struct st_ast *newnode(char op, struct st_ast * left, struct st_ast * right)
 
 struct st_ast *new_constant_integer(int value)
 {
-    struct st_ast * node = newnode('i', NULL, NULL);
+    struct st_ast * node = newnode('C', NULL, NULL);
     node->value.type = T_TYPE_INTEGER;
     node->value.integer = value;
     return node;
@@ -38,7 +38,7 @@ struct st_ast *new_constant_integer(int value)
 
 struct st_ast *new_constant_floating(double value)
 {
-    struct st_ast * node = newnode('f', NULL, NULL);
+    struct st_ast * node = newnode('C', NULL, NULL);
     node->value.type = T_TYPE_REAL;
     node->value.real = value;
     return node;
@@ -46,7 +46,7 @@ struct st_ast *new_constant_floating(double value)
 
 struct st_ast *new_variable(char * value)
 {
-    struct st_ast * node = newnode('v', NULL, NULL);
+    struct st_ast * node = newnode('V', NULL, NULL);
     node->value.type = T_KEY;
     node->value.name = value;
     return node;
@@ -106,11 +106,13 @@ struct st_ast_value evaluate(struct st_ast *ast)
 
     /* this is a read operation */
     switch(ast->op) {
-        case 'i':
-        case 'f':
+        case 'C':
             return ast->value;
-        case 'v':
+        case 'V':
             result = fetch_symbol(ast->value.name);
+            return result;
+        case 'N':
+            result.boolean = !ast->left->value.boolean;
             return result;
         default:
             break;
