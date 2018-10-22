@@ -21,13 +21,19 @@ struct st_ast_value {
 struct st_ast {
     struct st_ast * left;
     struct st_ast * right;
-    char op;
+    enum yytokentype op;
     struct st_ast_value value;
 };
 
-struct st_ast *newnode(char op, struct st_ast * left, struct st_ast * right);
-struct st_ast *new_constant_integer(int value);
-struct st_ast *new_constant_floating(double value);
-struct st_ast *new_variable(char * value);
+/* Create a general node */
+struct st_ast *newnode(enum yytokentype op, struct st_ast * left, struct st_ast * right);
+
+/* Create a leaf node */
+struct st_ast *new_constant_integer(int);
+struct st_ast *new_constant_real(double);
+struct st_ast *new_constant_boolean(int);
+struct st_ast *new_variable(char *);
+
+/* Evaluate the AST */
 struct st_ast_value evaluate(struct st_ast *ast);
 #endif

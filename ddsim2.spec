@@ -25,10 +25,16 @@ SECTION RD
 	PROPERTY damping_steps
 		TYPE integer
 		DESCRIPTION Steps to be simulated to get the original doping back after aplying damping
+FAILURE
+	DESCRIPTION The Solver parameters for Schrodinger are incoherent
+	DEPENDS_ON RD.activate
+	CONDITION SCH.nsteps * SCH.nblock > 10 * SCH.numeig OR SCH.nsteps * SCH.nblock < 3 * SCH.numeig
+
 
 FAILURE
 	DESCRIPTION You can't activate two different quantum mechanisms
 	CONDITION QC.activate AND SCH.activate
+
 
 WARNING
 	DESCRIPTION The masses you are using are not physically realistic!
@@ -36,8 +42,3 @@ WARNING
 	CONDITION QC.massX > 1.0 OR (QC.massY > 1.0 AND QC.massZ > 1.0)
 	DEPENDS_ON RD.activate
 
-FAILURE
-	DESCRIPTION The Solver parameters for Schrodinger are incoherent
-	DEPENDS_ON RD.activate
-	CONDITION (SCH.nsteps * SCH.nblock > 10 * SCH.numeig) OR (SCH.nsteps * SCH.nblock < 3 * SCH.numeig)
-#	CONDITION NOT (3 * SCH.numeig < SCH.nsteps * SCH.nblock < 10 * SCH.numeig)

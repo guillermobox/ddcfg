@@ -6,7 +6,9 @@
 #include "ast.h"
 #include "spec.h"
 
-void ast_free(struct st_ast * ast) {
+
+void ast_free(struct st_ast * ast)
+{
     if (ast->left) {
         ast_free(ast->left);
         ast->left = NULL;
@@ -18,7 +20,7 @@ void ast_free(struct st_ast * ast) {
     free(ast);
 }
 
-struct st_ast *newnode(char op, struct st_ast * left, struct st_ast * right)
+struct st_ast *newnode(enum yytokentype op, struct st_ast * left, struct st_ast * right)
 {
     struct st_ast * n;
     n = (struct st_ast *) malloc(sizeof(*n));
@@ -30,24 +32,32 @@ struct st_ast *newnode(char op, struct st_ast * left, struct st_ast * right)
 
 struct st_ast *new_constant_integer(int value)
 {
-    struct st_ast * node = newnode('C', NULL, NULL);
+    struct st_ast * node = newnode(T_INTEGER, NULL, NULL);
     node->value.type = T_TYPE_INTEGER;
     node->value.integer = value;
     return node;
 }
 
-struct st_ast *new_constant_floating(double value)
+struct st_ast *new_constant_real(double value)
 {
-    struct st_ast * node = newnode('C', NULL, NULL);
+    struct st_ast * node = newnode(T_REAL, NULL, NULL);
     node->value.type = T_TYPE_REAL;
     node->value.real = value;
     return node;
 }
 
+struct st_ast *new_constant_boolean(int value)
+{
+    struct st_ast *node = newnode(T_BOOLEAN, NULL, NULL);
+    node->value.type = T_TYPE_BOOLEAN;
+    node->value.boolean = value;
+    return node;
+}
+
 struct st_ast *new_variable(char * value)
 {
-    struct st_ast * node = newnode('V', NULL, NULL);
-    node->value.type = T_KEY;
+    struct st_ast * node = newnode(T_FULLNAME, NULL, NULL);
+    node->value.type = T_FULLNAME;
     node->value.name = value;
     return node;
 }
@@ -106,12 +116,13 @@ struct st_ast_value evaluate(struct st_ast *ast)
 
     /* this is a read operation */
     switch(ast->op) {
-        case 'C':
+        case T_INTEGER:
+        case T_REAL:
             return ast->value;
-        case 'V':
+        case T_FULLNAME:
             result = fetch_symbol(ast->value.name);
             return result;
-        case 'N':
+        case T_NOT:
             result.boolean = !ast->left->value.boolean;
             return result;
         default:
@@ -128,17 +139,17 @@ struct st_ast_value evaluate(struct st_ast *ast)
 
     if (result.type == T_TYPE_REAL) {
         switch(ast->op) {
-            case '+':
+            case T_ADD:
                 result.real = left.real + right.real;
                 return result;
-            case '*':
+            case T_MULTIPLY:
                 result.real = left.real * right.real;
                 return result;
-            case '>':
+            case T_GREATER:
                 result.boolean = left.real > right.real;
                 result.type = T_TYPE_BOOLEAN;
                 return result;
-            case '<':
+            case T_LESS:
                 result.boolean = left.real < right.real;
                 result.type = T_TYPE_BOOLEAN;
                 return result;
@@ -147,17 +158,17 @@ struct st_ast_value evaluate(struct st_ast *ast)
         }
     } else if(result.type == T_TYPE_INTEGER) {
         switch(ast->op) {
-            case '+':
+            case T_ADD:
                 result.integer = left.integer + right.integer;
                 return result;
-            case '*':
+            case T_MULTIPLY:
                 result.integer = left.integer * right.integer;
                 return result;
-            case '>':
+            case T_GREATER:
                 result.boolean = left.integer > right.integer;
                 result.type = T_TYPE_BOOLEAN;
                 return result;
-            case '<':
+            case T_LESS:
                 result.boolean = left.integer < right.integer;
                 result.type = T_TYPE_BOOLEAN;
                 return result;
@@ -166,10 +177,10 @@ struct st_ast_value evaluate(struct st_ast *ast)
         }
     } else if (result.type == T_TYPE_BOOLEAN) {
         switch (ast->op) {
-            case 'A':
+            case T_AND:
                 result.boolean = left.boolean && right.boolean;
                 return result;
-            case 'O':
+            case T_OR:
                 result.boolean = left.boolean || right.boolean;
                 return result;
             default:

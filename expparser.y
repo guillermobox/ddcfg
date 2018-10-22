@@ -271,6 +271,60 @@ void load_structures(struct st_spec * spec)
     printf("}\n");
 }
 
+
+
+void ast_print(struct st_ast * ast)
+{
+    printf("\"%p\" ", ast);
+    switch (ast->op) {
+        case T_FULLNAME:
+            printf("[shape=trapezium, label=\"%s\"]\n", ast->value.name);
+            break;
+        case T_AND:
+            printf("[fillcolor=darkslategray3, shape=box, label=AND]\n");
+            break;
+        case T_OR:
+            printf("[fillcolor=darkslategray3, shape=box, label=OR]\n");
+            break;
+        case T_ADD:
+            printf("[fillcolor=darkolivegreen3, shape=box, label=\"+\"]\n");
+            break;
+        case T_MULTIPLY:
+            printf("[fillcolor=darkolivegreen3, shape=box, label=\"&times;\"]\n");
+            break;
+        case T_INTEGER:
+            printf("[shape=oval, label=\"%d\"]\n", ast->value.integer);
+            break;
+        case T_REAL:
+            printf("[shape=oval, label=\"%f\"]\n", ast->value.real);
+            break;
+        case T_GREATER:
+            printf("[fillcolor=darkslategray3, shape=box, label=\">\"]\n");
+            break;
+        case T_LESS:
+            printf("[fillcolor=darkslategray3, shape=box, label=\"<\"]\n");
+            break;
+        default:
+            printf("\n");
+    }
+
+    if (ast->left && ast->right) {
+        printf("\"%p\" -> {\"%p\" \"%p\"}\n", ast, ast->left, ast->right);
+        ast_print(ast->left);
+        ast_print(ast->right);
+    }
+}
+
+void ast_export_to_dot(struct st_ast * ast)
+{
+    printf("digraph {\n");
+    printf(" node [fontname = \"helvetica\"];\n");
+
+    ast_print(ast);
+
+    printf("}\n");
+}
+
 int main(int argc, char *argv[])
 {
 	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
@@ -285,9 +339,10 @@ int main(int argc, char *argv[])
     resolve_symbols();
 
 
-    print_section(spec->sections);
-    print_constraint(spec->constraints);
+    //print_section(spec->sections);
+    //print_constraint(spec->constraints);
 
+    ast_export_to_dot(spec->constraints->ast);
     return 0;
 } 
 
@@ -300,14 +355,35 @@ int main(int argc, char *argv[])
     enum yytokentype token;
 }
 
+/* keywords for sections */
 %token T_SECTION T_SECMARKER T_DESCRIPTION T_PROPERTY T_TYPE
 %token T_FAILURE T_WARNING T_CONDITION T_DEPENDS_ON T_POINTS_TO
+
+/* This are aritmetic tokens */
+%token <token> T_ADD T_MULTIPLY T_SUBSTRACT
+
+/* There are the binary tokens */
+%token <token> T_OR T_AND T_NOT
+%token <token> T_LESS T_GREATER T_LESS_EQUAL T_GREATER_EQUAL T_EQUAL
+
+/* types for the properties */
 %token <token> T_TYPETOKEN T_TYPE_INTEGER T_TYPE_REAL T_TYPE_BOOLEAN T_TYPE_STRING T_TYPE_SUBSECTION
-%token <string> T_HALFNAME T_FULLNAME T_LITERAL T_KEY T_OP T_MONOOP
-%token <integer> T_INTEGER
+
+%token <string> T_HALFNAME T_FULLNAME T_LITERAL
+
+%token <integer> T_INTEGER T_BOOLEAN
 %token <floating> T_REAL
+
 %type <ast> expr
+
+
 //%expect 2
+
+%nonassoc T_NOT
+%left T_OR T_AND
+%nonassoc T_LESS T_GREATER T_LESS_EQUAL T_GREATER_EQUAL T_EQUAL
+%left T_ADD T_SUBSTRACT
+%left T_MULTIPLY
 
 
 %%
@@ -334,8 +410,6 @@ warning: warningheader description constraintoptions
     activecons->description = strdup(description->content);
     string_free(description);
     description = string_new_empty();
-    activecons->ast = root;
-    activecons->expression = root_expression;
 };
 
 failure: failureheader description constraintoptions
@@ -343,8 +417,6 @@ failure: failureheader description constraintoptions
     activecons->description = strdup(description->content);
     string_free(description);
     description = string_new_empty();
-    activecons->ast = root;
-    activecons->expression = root_expression;
 };
 
 failureheader: T_FAILURE
@@ -359,7 +431,7 @@ warningheader: T_WARNING
     activecons->type = T_WARNING;
 };
 
-expr: T_KEY
+expr: T_FULLNAME
 {
     $$ = new_variable($1);
 };
@@ -369,20 +441,31 @@ expr: T_INTEGER
 };
 expr: T_REAL
 {
-    $$ = new_constant_floating($1);
+    $$ = new_constant_real($1);
+};
+expr: T_BOOLEAN
+{
+    $$ = new_constant_boolean($1);
 };
 expr: '(' expr ')'
 {
     $$ = $2;
 };
-expr: T_MONOOP expr
-{
-    $$ = newnode($1[0], $2, NULL);
-};
-expr: expr T_OP expr
-{
-    $$ = newnode($2[0], $1, $3);
-};
+
+
+expr: expr T_ADD expr {$$ = newnode($2, $1, $3);};
+expr: expr T_MULTIPLY expr {$$ = newnode($2, $1, $3);};
+expr: expr T_SUBSTRACT expr {$$ = newnode($2, $1, $3);};
+expr: expr T_AND expr {$$ = newnode($2, $1, $3);};
+expr: expr T_OR expr {$$ = newnode($2, $1, $3);};
+expr: expr T_LESS expr {$$ = newnode($2, $1, $3);};
+expr: expr T_GREATER expr {$$ = newnode($2, $1, $3);};
+expr: expr T_LESS_EQUAL expr {$$ = newnode($2, $1, $3);};
+expr: expr T_GREATER_EQUAL expr {$$ = newnode($2, $1, $3);};
+expr: expr T_EQUAL expr {$$ = newnode($2, $1, $3);};
+expr: T_NOT expr {$$ = newnode($1, $2, NULL);};
+
+
 properties
     : property
     | property properties
@@ -400,7 +483,7 @@ beginproperty: T_PROPERTY T_HALFNAME
 
 constraintoptions
     : /* empty */
-    | constraintoption constraintoptions
+    | constraintoptions constraintoption
     ;
 
 constraintoption: T_DEPENDS_ON T_FULLNAME
@@ -409,8 +492,8 @@ constraintoption: T_DEPENDS_ON T_FULLNAME
 };
 constraintoption: T_CONDITION T_LITERAL expr
 {
-    root = $3;
-    root_expression = $2;
+    activecons->ast = $3;
+    activecons->expression = $2;
 };
 
 options

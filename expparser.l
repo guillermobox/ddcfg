@@ -111,20 +111,35 @@ DESCRIPTION {
         return T_REAL;
     }
 
-    {OPERATION} {
-        yylval.string = strdup(yytext);
-        return T_OP;
-    }
-
-    {MONOOPERATION} {
-        yylval.string = strdup(yytext);
-        return T_MONOOP;
-    }
-
     {FULLNAME} {
         yylval.string = strdup(yytext);
-        return T_KEY;
+        return T_FULLNAME;
     }
+
+    true|TRUE|yes|YES {
+        yylval.integer = 1;
+        return T_BOOLEAN;
+    }
+
+    false|FALSE|no|NO {
+        yylval.integer = 0;
+        return T_BOOLEAN;
+    }
+
+
+    "OR"    yylval.token = T_OR; return T_OR;
+    "AND"   yylval.token = T_AND; return T_AND;
+    "NOT"   yylval.token = T_NOT; return T_NOT;
+
+    "+"     yylval.token = T_ADD; return T_ADD;
+    "*"     yylval.token = T_MULTIPLY; return T_MULTIPLY;
+    "-"     yylval.token = T_SUBSTRACT; return T_SUBSTRACT;
+
+    "<"     yylval.token = T_LESS; return T_LESS;
+    ">"     yylval.token = T_GREATER; return T_GREATER;
+    "<="    yylval.token = T_LESS_EQUAL; return T_LESS_EQUAL;
+    ">="    yylval.token = T_GREATER_EQUAL; return T_GREATER_EQUAL;
+    "=="    yylval.token = T_EQUAL; return T_EQUAL;
 
     [(] { return '('; }
     [)] { return ')'; }
