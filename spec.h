@@ -22,7 +22,8 @@
 
 struct st_spec {
 	char * contents;
-	long int length;
+	unsigned int length;
+	
 	struct st_spec_section *sections;
 	struct st_spec_constraint * constraints;
 };
@@ -31,6 +32,8 @@ struct st_spec_constraint {
 	char * description;
 	enum yytokentype type;
 	const char * expression;
+
+	struct st_spec_property * depends_on;
 	struct st_ast * ast;
 	struct st_spec * spec;
 	struct st_spec_constraint * next;
@@ -40,6 +43,7 @@ struct st_spec_section {
 	char * name;
 	char * description;
 	enum yytokentype type;
+
 	struct st_spec * spec;
 	struct st_spec_section * next;
 	struct st_spec_property * properties;

@@ -107,18 +107,16 @@ DESCRIPTION {
 
     {FLOAT} {
         yylval.floating = strtod(yytext, NULL);
-        return T_FLOAT;
+        return T_REAL;
     }
 
     {OPERATION} {
         yylval.string = strdup(yytext);
-
         return T_OP;
     }
 
     {FULLNAME} {
         yylval.string = strdup(yytext);
-
         return T_KEY;
     }
 

@@ -18,6 +18,7 @@ struct st_spec_property * activeproperty;
 struct st_spec_constraint * activecons;
 struct st_spec * spec;
 
+
 void queue_symbol(const char *name, void * where) {
     struct st_resolve * symbol = malloc(sizeof(*symbol));
     symbol->symbol = name;
@@ -35,7 +36,7 @@ void resolve_symbols() {
         if (prop) {
             *((struct st_spec_property **) sym->where) = prop;
         } else {
-            printf("Symbol impossible to resolve!\n");
+            printf("Symbol impossible to resolve! %s\n", sym->symbol);
         }
         free(p);
         p = stack_pop(st);
@@ -200,7 +201,7 @@ void print_constraint(struct st_spec_constraint *cons)
     if (cons->type == T_WARNING) type = "warning";
     else if (cons->type == T_FAILURE) type = "failure";
     printf("\n\033[;1mConstraint: %s\033[0m (%s)\n", type, cons->description);
-    printf("     ast: %s\n", cons->expression);
+    printf("    expr: %s\n", cons->expression);
     print_constraint(cons->next);
 }
 
@@ -278,6 +279,7 @@ int main(int argc, char *argv[])
 
     ddcfg_parse_args(argc, argv);
     description = string_new_empty();
+
     yyparse();
 
     resolve_symbols();
@@ -303,9 +305,9 @@ int main(int argc, char *argv[])
 %token <token> T_TYPETOKEN T_TYPE_INTEGER T_TYPE_REAL T_TYPE_BOOLEAN T_TYPE_STRING T_TYPE_SUBSECTION
 %token <string> T_HALFNAME T_FULLNAME T_LITERAL T_KEY T_OP
 %token <integer> T_INTEGER
-%token <floating> T_FLOAT
+%token <floating> T_REAL
 %type <ast> expr
-%expect 2
+//%expect 2
 
 
 %%
@@ -313,10 +315,11 @@ spec: /* empty */
     | section spec 
     | failure spec
     | warning spec
+    ;
 
 section: sectionheader properties
 {
-}
+};
 
 sectionheader: newsection description
 {
@@ -324,114 +327,125 @@ sectionheader: newsection description
 
     string_free(description);
     description = string_new_empty();
-}
+};
 
-warning: newwarning description condition
+warning: warningheader description constraintoptions
 {
     activecons->description = strdup(description->content);
     string_free(description);
     description = string_new_empty();
     activecons->ast = root;
     activecons->expression = root_expression;
-}
+};
 
-failure: newfailure description condition
+failure: failureheader description constraintoptions
 {
     activecons->description = strdup(description->content);
     string_free(description);
     description = string_new_empty();
     activecons->ast = root;
     activecons->expression = root_expression;
-}
+};
 
-newfailure: T_FAILURE
+failureheader: T_FAILURE
 {
     activecons = new_constraint(spec);
     activecons->type = T_FAILURE;
-}
+};
 
-newwarning: T_WARNING
+warningheader: T_WARNING
 {   
     activecons = new_constraint(spec);
     activecons->type = T_WARNING;
-}
-
-condition: T_CONDITION T_LITERAL expr
-{
-    root = $3;
-    root_expression = $2;
-}
+};
 
 expr: T_KEY
 {
     $$ = new_variable($1);
-}
+};
 expr: T_INTEGER
 {
     $$ = new_constant_integer($1);
-}
-expr: T_FLOAT
+};
+expr: T_REAL
 {
     $$ = new_constant_floating($1);
-}
+};
 expr: '(' expr ')'
 {
     $$ = $2;
-}
+};
 expr: expr T_OP expr
 {
     $$ = newnode($2[0], $1, $3);
-}
-
+};
 properties
     : property
-    | property properties 
+    | property properties
+    ;
 
 property: beginproperty options 
 {
-}
+};
 
 beginproperty: T_PROPERTY T_HALFNAME
 {
     activeproperty = new_property(activesection);
     activeproperty->name = $2;
-}
+};
+
+constraintoptions
+    : /* empty */
+    | constraintoption constraintoptions
+    ;
+
+constraintoption: T_DEPENDS_ON T_FULLNAME
+{
+    queue_symbol($2, &activecons->depends_on);
+};
+constraintoption: T_CONDITION T_LITERAL expr
+{
+    root = $3;
+    root_expression = $2;
+};
 
 options
-    : option
+    : 
     | option options
+    ;
 
 option: T_TYPE T_TYPETOKEN
 {
     activeproperty->type = $2;
-}
+};
 option: T_DEPENDS_ON T_FULLNAME
 {
     queue_symbol($2, &activeproperty->depends_on);
-}
+};
 option: T_POINTS_TO T_FULLNAME
 {
     queue_symbol($2, &activeproperty->points_to);
-}
+};
 option: description
 {
     activeproperty->description = strdup(description->content);
     string_free(description);
     description = string_new_empty();
-}
+};
 
 newsection: T_SECTION T_HALFNAME
 {
     activesection = new_section(spec);
     activesection->name = $2;
-}
+};
 
 description
     : descriptionline
-    | descriptionline description
+    | description descriptionline
+    ;
 
 descriptionline: T_DESCRIPTION T_LITERAL 
 {
     string_cat_array(description, $2);
     free($2);
-}
+};
