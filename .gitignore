@@ -12,3 +12,5 @@ wizard
 a.out
 expparser
 gmon.out
+.vscode
+test_*

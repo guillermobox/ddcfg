@@ -15,7 +15,7 @@ expparser.tab.c: expparser.y expparser.l
 	bison -d expparser.y
 
 %.o: %.c
-	$(CC) -c -g $^ -o $@
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 clean:
 	rm -f *.o *.a wizard

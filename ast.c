@@ -94,7 +94,7 @@ enum yytokentype getcommontype(struct st_ast_value x, struct st_ast_value y)
         return T_TYPE_REAL;
     if (x.type == T_TYPE_INTEGER && y.type == T_TYPE_INTEGER)
         return T_TYPE_INTEGER;
-    printf("ERROR!");
+    return 0;
 };
 
 void cast(struct st_ast_value *val, enum yytokentype type)
@@ -111,7 +111,6 @@ void cast(struct st_ast_value *val, enum yytokentype type)
 
 struct st_ast_value evaluate(struct st_ast *ast)
 {
-    char *section, *option;
     struct st_ast_value left, right, result;
 
     /* this is a read operation */

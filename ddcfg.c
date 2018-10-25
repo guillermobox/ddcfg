@@ -383,7 +383,7 @@ int ddcfg_load_specfile(const char *specfile)
 	FILE * f = NULL;
 	unsigned char * contents = NULL;
 	size_t length = 0;
-
+		
 	f = fopen(specfile, "rb");
 
 	fseek(f, 0, SEEK_END);

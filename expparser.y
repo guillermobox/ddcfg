@@ -76,7 +76,7 @@ struct st_spec_property * property_from_string(const char * s)
 {
     struct st_spec_section * sec;
     struct st_spec_property *prop;
-    const char * secname, *propname;
+    const char * secname;
     char * p;
     size_t len;
 

@@ -5,6 +5,7 @@
 
 #ifndef __DDCFG_H__
 #define __DDCFG_H__
+#include <stdio.h>
 
 #define DDCFG_ERRNO_NOTHING 0
 
@@ -14,6 +15,7 @@ int ddcfg_parse_double(const char *string, double *value);
 int ddcfg_parse_int(const char *string, int *value);
 int ddcfg_parse_bool(const char *string, int *value);
 struct nlist * ddcfg_lookup(const char *section, const char *option);
+int handler(const char *section, const char *option, const char *value);
 
 /* Parse a file to the dictionary of key/value pairs. Call this
  * before any other call, otherwise they will return error.

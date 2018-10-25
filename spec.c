@@ -7,6 +7,11 @@
 #include "hash.h"
 #include "ini.h"
 
+
+typedef struct yy_buffer_state * YY_BUFFER_STATE;
+extern YY_BUFFER_STATE yy_scan_string(char * str);
+extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
+
 struct st_spec * spec = NULL;
 
 static void spec_error(const char *errormsg, struct st_spec_property *prop)
@@ -64,7 +69,8 @@ int spec_check_type(struct st_spec_property *property, char * value)
 			return 0;
 		default:
 			printf("IMPOSSIBLE!");
-	}	
+	};
+	return 0;	
 };
 
 int spec_internal_consistency(struct st_spec_section *section, struct st_spec_property *property)
@@ -284,10 +290,11 @@ int spec_check_section(struct st_spec_section *section)
 	return err;
 }
 
-
 int spec_new_from_data(unsigned char * data, unsigned int length)
 {
 	extern void bison_parse(void);
+	YY_BUFFER_STATE buffer;
+
 	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
 
 	spec->sections = NULL;
@@ -295,9 +302,11 @@ int spec_new_from_data(unsigned char * data, unsigned int length)
 	spec->contents = (char *) data;
 	spec->length = length;
 
-	yy_scan_string(spec->contents);
+	buffer = yy_scan_string(spec->contents);
 
 	bison_parse();
+
+	yy_delete_buffer(buffer);
 
 	return 0;
 };
