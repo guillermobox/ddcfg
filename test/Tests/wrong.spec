@@ -2,7 +2,7 @@ SECTION Section
 DESCRIPTION This is a description
 
 PROPERTY option
-TYPE double
+TYPE real
 DEFAULT thisisnotadouble
 
 PROPERTY x
@@ -12,11 +12,11 @@ PROPERTY z
 DEPENDS_ON This.doesnot
 
 PROPERTY a
-TYPE bool
+TYPE boolean
 VALUES 1, 3, yes
 
 PROPERTY b
-TYPE bool
+TYPE boolean
 DEPENDS_ON Section.b
 
 PROPERTY c

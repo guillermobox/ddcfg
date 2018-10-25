@@ -6,6 +6,8 @@
 #include "utilities.h"
 #include "ast.h"
 #include "spec.h"
+
+extern struct st_spec * spec;
 extern int yylex(void);
 extern int yyparse(void);
 #define YYERROR_VERBOSE
@@ -16,32 +18,59 @@ Stack st;
 struct st_spec_section * activesection;
 struct st_spec_property * activeproperty;
 struct st_spec_constraint * activecons;
-struct st_spec * spec;
 
 
-void queue_symbol(const char *name, void * where) {
+void queue_symbol(const char *name, void * where, enum yytokentype type) {
     struct st_resolve * symbol = malloc(sizeof(*symbol));
     symbol->symbol = name;
     symbol->where = where;
+    symbol->type = type;
     stack_push(st, symbol);
 };
+
 struct st_spec_property * property_from_string(const char * s);
+struct st_spec_section * section_from_string(const char * s);
 
 void resolve_symbols() {
     void * p = stack_pop(st);
     while (p) {
         struct st_spec_property * prop;
+        struct st_spec_section * sec;
         struct st_resolve * sym = (struct st_resolve *) p;
-        prop = property_from_string(sym->symbol);
-        if (prop) {
-            *((struct st_spec_property **) sym->where) = prop;
-        } else {
-            printf("Symbol impossible to resolve! %s\n", sym->symbol);
+
+        if (sym->type == T_PROPERTY) {
+            prop = property_from_string(sym->symbol);
+            if (prop) {
+                *((struct st_spec_property **) sym->where) = prop;
+            } else {
+                //printf("Symbol impossible to resolve! %s\n", sym->symbol);
+            }
+        } else if (sym->type == T_SECTION) {
+            sec = section_from_string(sym->symbol);
+            if (sec) {
+                *((struct st_spec_section **) sym->where) = sec;
+            } else {
+                //printf("Symbol for section impossible to resolve! %s\n", sym->symbol);
+            }
         }
         free(p);
         p = stack_pop(st);
     }
 };
+
+struct st_spec_section * section_from_string(const char * s)
+{
+    struct st_spec_section * sec;
+    size_t len;
+    len = strlen(s);
+    sec = spec->sections;
+    while (sec) {
+        if (strncmp(sec->name, s, len) == 0)
+            break;
+        sec = sec->next;
+    }
+    return sec;
+}
 
 struct st_spec_property * property_from_string(const char * s)
 {
@@ -52,6 +81,10 @@ struct st_spec_property * property_from_string(const char * s)
     size_t len;
 
     p = strchr(s, '.');
+    if (p == NULL) {
+        printf("This string is not a property!\n");
+        return 0;
+    }
     len = p - s;
     secname = s;
     sec = spec->sections;
@@ -168,23 +201,35 @@ void print_property(struct st_spec_property *prop)
             type = "boolean";
         } else if (prop->type == T_TYPE_STRING) {
             type = "string";
-        } 
+        } else if (prop->type == T_TYPE_SUBSECTION) {
+            type = "subsection";
+        }
 
-        printf("    %s <%s> (%s)\n", prop->name, type, prop->description);
+        printf("    %s <%s> (%s)\n", prop->name, type, prop->description?prop->description:"no description");
         if (prop->depends_on) {
             printf("        depending on this: %s.%s\n",
                 prop->depends_on->section->name,
                 prop->depends_on->name);
         }
-
+        if (prop->defaultvalue) {
+            printf("        has default value: %s\n", prop->defaultvalue);
+        }
+        if (prop->values) {
+            printf("        has possible values: %s\n", prop->values);
+        }
+        if (prop->points_to) {
+            printf("        points to this section: %s\n", prop->points_to->name);
+        }
         print_property(prop->next);
     }
 }
 
 void print_section(struct st_spec_section *sec)
 {
-
-    printf("\n\033[;1mSection: %s\033[0m (%s)\n", sec->name, sec->description);
+    if (sec->type == T_SECTION)
+        printf("\n\033[;1mSection: %s\033[0m (%s)\n", sec->name, sec->description);
+    else if (sec->type == T_SUBSECTION)
+        printf("\n\033[;1mSubsection: %s\033[0m (%s)\n", sec->name, sec->description);
     print_property(sec->properties);
 
     if (sec->next)
@@ -205,134 +250,11 @@ void print_constraint(struct st_spec_constraint *cons)
     print_constraint(cons->next);
 }
 
-void structure_property(struct st_spec_property *prop) 
-{
-        if (prop != NULL) {
-        const char * type;
-        if (prop->type == T_TYPE_INTEGER) {
-            type = "int";
-        } else if (prop->type == T_TYPE_REAL) {
-            type = "double";
-        } else if (prop->type == T_TYPE_BOOLEAN) {
-            type = "int";
-        } else if (prop->type == T_TYPE_STRING) {
-            type = "char* ";
-        } 
-        printf("        %s %s; /*!< %s */\n", type, prop->name, prop->description);
-        structure_property(prop->next);
-    }
-}
 
-void structure_section(struct st_spec_section *sec)
-{
-    printf("\nstruct ddcfg_database {\n");
-    while (sec) {
-        printf("    struct {\n");
-        structure_property(sec->properties);
-        printf("    } %s; /*!< %s */\n", sec->name, sec->description);
-        sec = sec->next;
-    }
-    printf("} database;\n\n");
-}
-
-void load_structure_property(struct st_spec_property *prop)
-{
-    const char *sec, *pro, *command;
-    sec = prop->section->name;
-    pro = prop->name;
-    switch(prop->type) {
-        case T_TYPE_INTEGER: command = "ddcfg_int"; break;
-        case T_TYPE_REAL:    command = "ddcfg_double"; break;
-        case T_TYPE_BOOLEAN: command = "ddcfg_bool"; break;
-        case T_TYPE_STRING:  command = "ddcfg_get"; break;
-        default: break;
-    }
-    printf("    database.%s.%s = %s(\"%s\", \"%s\");\n", sec, pro, command, sec, pro);
-}
-
-void load_structure_section(struct st_spec_section *sec)
-{
-    struct st_spec_property *prop = sec->properties;
-    while (prop) {
-        load_structure_property(prop);
-        prop = prop->next;
-    }
-}
-
-void load_structures(struct st_spec * spec)
-{
-    struct st_spec_section * sec = spec->sections;
-
-    printf("void freeze_database()\n{\n");
-    while (sec) {
-        load_structure_section(sec);
-        sec = sec->next;
-    }
-    printf("}\n");
-}
-
-
-
-void ast_print(struct st_ast * ast)
-{
-    printf("\"%p\" ", ast);
-    switch (ast->op) {
-        case T_FULLNAME:
-            printf("[shape=trapezium, label=\"%s\"]\n", ast->value.name);
-            break;
-        case T_AND:
-            printf("[fillcolor=darkslategray3, shape=box, label=AND]\n");
-            break;
-        case T_OR:
-            printf("[fillcolor=darkslategray3, shape=box, label=OR]\n");
-            break;
-        case T_ADD:
-            printf("[fillcolor=darkolivegreen3, shape=box, label=\"+\"]\n");
-            break;
-        case T_MULTIPLY:
-            printf("[fillcolor=darkolivegreen3, shape=box, label=\"&times;\"]\n");
-            break;
-        case T_INTEGER:
-            printf("[shape=oval, label=\"%d\"]\n", ast->value.integer);
-            break;
-        case T_REAL:
-            printf("[shape=oval, label=\"%f\"]\n", ast->value.real);
-            break;
-        case T_GREATER:
-            printf("[fillcolor=darkslategray3, shape=box, label=\">\"]\n");
-            break;
-        case T_LESS:
-            printf("[fillcolor=darkslategray3, shape=box, label=\"<\"]\n");
-            break;
-        default:
-            printf("\n");
-    }
-
-    if (ast->left && ast->right) {
-        printf("\"%p\" -> {\"%p\" \"%p\"}\n", ast, ast->left, ast->right);
-        ast_print(ast->left);
-        ast_print(ast->right);
-    }
-}
-
-void ast_export_to_dot(struct st_ast * ast)
-{
-    printf("digraph {\n");
-    printf(" node [fontname = \"helvetica\"];\n");
-
-    ast_print(ast);
-
-    printf("}\n");
-}
-
-int main(int argc, char *argv[])
-{
-	spec = (struct st_spec *) malloc(sizeof(struct st_spec));
-	spec->sections = NULL;
+void bison_parse() {
     st = stack_new(0);
-
-    ddcfg_parse_args(argc, argv);
     description = string_new_empty();
+
 
     yyparse();
 
@@ -341,9 +263,6 @@ int main(int argc, char *argv[])
 
     //print_section(spec->sections);
     //print_constraint(spec->constraints);
-
-    ast_export_to_dot(spec->constraints->ast);
-    return 0;
 } 
 
 %}
@@ -356,8 +275,9 @@ int main(int argc, char *argv[])
 }
 
 /* keywords for sections */
-%token T_SECTION T_SECMARKER T_DESCRIPTION T_PROPERTY T_TYPE
-%token T_FAILURE T_WARNING T_CONDITION T_DEPENDS_ON T_POINTS_TO
+%token T_SECMARKER T_DESCRIPTION T_PROPERTY T_TYPE
+%token T_FAILURE T_WARNING T_CONDITION T_DEPENDS_ON T_POINTS_TO T_DEFAULT
+%token T_VALUES
 
 /* This are aritmetic tokens */
 %token <token> T_ADD T_MULTIPLY T_SUBSTRACT
@@ -368,6 +288,7 @@ int main(int argc, char *argv[])
 
 /* types for the properties */
 %token <token> T_TYPETOKEN T_TYPE_INTEGER T_TYPE_REAL T_TYPE_BOOLEAN T_TYPE_STRING T_TYPE_SUBSECTION
+%token <token> T_SECTION T_SUBSECTION
 
 %token <string> T_HALFNAME T_FULLNAME T_LITERAL
 
@@ -488,7 +409,7 @@ constraintoptions
 
 constraintoption: T_DEPENDS_ON T_FULLNAME
 {
-    queue_symbol($2, &activecons->depends_on);
+    queue_symbol($2, &activecons->depends_on, T_PROPERTY);
 };
 constraintoption: T_CONDITION T_LITERAL expr
 {
@@ -507,11 +428,11 @@ option: T_TYPE T_TYPETOKEN
 };
 option: T_DEPENDS_ON T_FULLNAME
 {
-    queue_symbol($2, &activeproperty->depends_on);
+    queue_symbol($2, &activeproperty->depends_on, T_PROPERTY);
 };
-option: T_POINTS_TO T_FULLNAME
+option: T_POINTS_TO T_HALFNAME
 {
-    queue_symbol($2, &activeproperty->points_to);
+    queue_symbol($2, &activeproperty->points_to, T_SECTION);
 };
 option: description
 {
@@ -519,11 +440,20 @@ option: description
     string_free(description);
     description = string_new_empty();
 };
+option: T_DEFAULT T_LITERAL
+{
+    activeproperty->defaultvalue = $2;
+};
+option: T_VALUES T_LITERAL
+{
+    activeproperty->values = $2;
+};
 
 newsection: T_SECTION T_HALFNAME
 {
     activesection = new_section(spec);
     activesection->name = $2;
+    activesection->type = $1;
 };
 
 description

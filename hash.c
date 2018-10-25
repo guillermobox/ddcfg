@@ -9,25 +9,6 @@
 
 static struct nlist *hashtab[HASHSIZE];	/* pointer table */
 
-void dump_test_hash()
-{
-	struct nlist * np;
-	size_t size;
-	for (size = 0; size < HASHSIZE; size++) {
-		np = hashtab + size;
-		if (np != NULL) {
-			while (np) {
-				printf("%s ", np->key);
-				np = np->next;
-			}
-			printf("\n");
-		} else {
-			printf("EMPTY\n");
-		}
-	}
-
-};
-
 /* form hash value for string s */
 __DDCFG_EXPORT__ unsigned hash(const char *s)
 {

@@ -5,41 +5,41 @@ DESCRIPTION Check that default values work correctly
 
 # ANOTHER COMMENT
 PROPERTY a
-TYPE double
+TYPE real
 # EVEN HERE COMMENTS ARE OK
 # WITH MORE THAN ONE LINE
 DEFAULT 3.141592873642829385612
 
 PROPERTY b
-TYPE bool
+TYPE boolean
 DEFAULT true
 
 PROPERTY c
-TYPE bool
+TYPE boolean
 DEFAULT YES
 
 PROPERTY d
-TYPE bool
+TYPE boolean
 DEFAULT No
 
 PROPERTY e
-TYPE bool
+TYPE boolean
 DEFAULT 0
 
 PROPERTY f
-TYPE bool
+TYPE boolean
 DEFAULT 1
 
 PROPERTY g
-TYPE int
+TYPE integer
 DEFAULT 0
 
 PROPERTY h
-TYPE int
+TYPE integer
 DEFAULT -20
 
 PROPERTY i
-TYPE int
+TYPE integer
 DEFAULT 91923
 
 SECTION ListValues
@@ -47,12 +47,12 @@ DESCRIPTION Check the facility to have lists of values
 
 PROPERTY a
 DESCRIPTION Integer from a list
-TYPE int
+TYPE integer
 VALUES 1,2,3
 
 PROPERTY b
 DESCRIPTION Integer from a list
-TYPE int
+TYPE integer
 VALUES 123,456,789
 
 PROPERTY c
@@ -61,7 +61,7 @@ VALUES all,these,are,ok
 
 PROPERTY d
 DESCRIPTION Double from a list
-TYPE double
+TYPE real
 VALUES 1.23,9.0,0.00000123
 
 SECTION Dependencies
@@ -70,12 +70,12 @@ DESCRIPTION Check dependencies of the keys
 PROPERTY true
 DESCRIPTION This is always true
 DEFAULT true
-TYPE bool
+TYPE boolean
 
 PROPERTY false
 DESCRIPTION This is always false
 DEFAULT false
-TYPE bool
+TYPE boolean
 
 PROPERTY notrequired
 DESCRIPTION This is not required, depends on false key
@@ -92,14 +92,14 @@ DEFAULT set
 
 PROPERTY switch1
 DESCRIPTION This will be switched in the config file
-TYPE bool
+TYPE boolean
 
 PROPERTY if_switch1
 DESCRIPTION Depends on the previous switch
 DEPENDS_ON Dependencies.switch1
 
 PROPERTY switch2
-TYPE bool
+TYPE boolean
 
 PROPERTY if_switch2
 DEPENDS_ON Dependencies.switch1
@@ -128,5 +128,5 @@ DESCRIPTION These sections are special, they are subsections with diferent names
 
 PROPERTY value
 DESCRIPTION A single value if ok for testing
-TYPE int
+TYPE integer
 

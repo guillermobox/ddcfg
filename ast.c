@@ -190,3 +190,56 @@ struct st_ast_value evaluate(struct st_ast *ast)
 
     return result;
 }
+
+
+void ast_print(struct st_ast * ast)
+{
+    printf("\"%p\" ", ast);
+    switch (ast->op) {
+        case T_FULLNAME:
+            printf("[shape=trapezium, label=\"%s\"]\n", ast->value.name);
+            break;
+        case T_AND:
+            printf("[fillcolor=darkslategray3, shape=box, label=AND]\n");
+            break;
+        case T_OR:
+            printf("[fillcolor=darkslategray3, shape=box, label=OR]\n");
+            break;
+        case T_ADD:
+            printf("[fillcolor=darkolivegreen3, shape=box, label=\"+\"]\n");
+            break;
+        case T_MULTIPLY:
+            printf("[fillcolor=darkolivegreen3, shape=box, label=\"&times;\"]\n");
+            break;
+        case T_INTEGER:
+            printf("[shape=oval, label=\"%d\"]\n", ast->value.integer);
+            break;
+        case T_REAL:
+            printf("[shape=oval, label=\"%f\"]\n", ast->value.real);
+            break;
+        case T_GREATER:
+            printf("[fillcolor=darkslategray3, shape=box, label=\">\"]\n");
+            break;
+        case T_LESS:
+            printf("[fillcolor=darkslategray3, shape=box, label=\"<\"]\n");
+            break;
+        default:
+            printf("\n");
+    }
+
+    if (ast->left && ast->right) {
+        printf("\"%p\" -> {\"%p\" \"%p\"}\n", ast, ast->left, ast->right);
+        ast_print(ast->left);
+        ast_print(ast->right);
+    }
+}
+
+void ast_export_to_dot(struct st_ast * ast)
+{
+    printf("digraph {\n");
+    printf(" node [fontname = \"helvetica\"];\n");
+
+    ast_print(ast);
+
+    printf("}\n");
+}

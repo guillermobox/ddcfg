@@ -26,16 +26,30 @@ TYPE {
     BEGIN(type);
     return T_TYPE;
 }
+DEFAULT {
+    BEGIN(literal);
+    return T_DEFAULT;
+}
+VALUES {
+    BEGIN(literal);
+    return T_VALUES;
+}
 DEPENDS_ON {
     BEGIN(fullname);
     return T_DEPENDS_ON;
 }
 POINTS_TO {
-    BEGIN(fullname);
+    BEGIN(halfname);
     return T_POINTS_TO;
 }
-SUBSECTION|SECTION {
+SECTION {
     BEGIN(halfname);
+    yylval.token = T_SECTION;
+    return T_SECTION;
+}
+SUBSECTION {
+    BEGIN(halfname);
+    yylval.token = T_SUBSECTION;
     return T_SECTION;
 }
 FAILURE {
@@ -148,4 +162,8 @@ DESCRIPTION {
     }
 }
 
+. {
+    printf("at line %d, Unrecognized character!\n", yylineno);
+    exit(1);
+}
 %%

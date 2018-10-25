@@ -7,9 +7,7 @@ clean:
 
 tests: testdriver test_select test_configuration test_parsing
 	@echo
-	@echo Running tests
-	@echo
-	@python2 ybt.py testsuite.yaml
+	@echo Run 'theo' to test the library now from github.com/guillermobox/theo
 	@echo
 
 testdriver: testdriver.c ../ddcfg.a

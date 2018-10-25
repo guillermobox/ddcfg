@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	if (argc < 3) {
 		printf("Usage: %s <configuration> <spec>\n", argv[0]);
 		exit(EXIT_FAILURE);
-	};
+	}
 
 	if ((errno = ddcfg_parse(argv[1])) != 0) {
 		if (errno == -1)
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 		else
 			printf("Error parsing line %d of spec file %s\n", errno, argv[2]);
 		exit(EXIT_FAILURE);
-	};
+	}
 
 	if ((errno = ddcfg_check_spec())){
 		printf("%d errors found!\n", errno);
@@ -38,4 +38,4 @@ int main(int argc, char *argv[])
 	ddcfg_free();
 
 	return EXIT_SUCCESS;
-};
+}

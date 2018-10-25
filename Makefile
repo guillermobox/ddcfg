@@ -7,10 +7,15 @@ all: ddcfg.a
 test: ddcfg.a
 	cd test && make
 
-ddcfg.a: ddcfg-merged.o
+ddcfg.a: ast.o ddcfg.o expparser.tab.o lex.yy.o hash.o ini.o spec.o utilities.o
 	ar -rc $@ $^
 
-ddcfg-merged.o: $(wildcard *.c)
+expparser.tab.c: expparser.y expparser.l
+	lex -s expparser.l
+	bison -d expparser.y
+
+%.o: %.c
+	$(CC) -c -g $^ -o $@
 
 clean:
 	rm -f *.o *.a wizard

@@ -6,7 +6,14 @@
 #ifndef __DDCFG_H__
 #define __DDCFG_H__
 
+#define DDCFG_ERRNO_NOTHING 0
+
 char ** ddcfg_parselist(const char *string, int *length);
+
+int ddcfg_parse_double(const char *string, double *value);
+int ddcfg_parse_int(const char *string, int *value);
+int ddcfg_parse_bool(const char *string, int *value);
+struct nlist * ddcfg_lookup(const char *section, const char *option);
 
 /* Parse a file to the dictionary of key/value pairs. Call this
  * before any other call, otherwise they will return error.
@@ -72,7 +79,7 @@ int ddcfg_load_specfile(const char *specfile);
 /* Load the spec contents directly from memory and parse them. The contents
  * will be copied to a internal buffer.
  */
-int ddcfg_load_specdata(const char *contents, int length);
+int ddcfg_load_specdata(unsigned char *contents, unsigned int length);
 
 /* Check if the configuration database complies with the spec. Return 0 on
  * exit, and any number of errors if not.

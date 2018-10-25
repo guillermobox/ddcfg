@@ -6,6 +6,7 @@
 struct st_resolve {
     const char * symbol;
     void * where;
+    enum yytokentype type;
 };
 
 struct st_ast_value {

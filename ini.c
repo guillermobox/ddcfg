@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 #include "ini.h"
 
 /* Strip whitespace chars off end of given string, in place. Return s. */
