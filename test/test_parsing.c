@@ -1,8 +1,3 @@
-/* ybt
- * name   : TestConfiguration
- * run    : ./test_configuration
- * return : 0
-*/
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

@@ -1,8 +1,3 @@
-/* ybt
- * name   : SelectFunction
- * run    : ./test_select Tests/select.ini
- * return : 0
-*/
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
