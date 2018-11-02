@@ -227,28 +227,46 @@ void ast_print(struct st_ast * ast)
             printf("[shape=trapezium, label=\"%s\"]\n", ast->value.name);
             break;
         case T_AND:
-            printf("[fillcolor=darkslategray3, shape=box, label=AND]\n");
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=AND]\n");
             break;
         case T_OR:
-            printf("[fillcolor=darkslategray3, shape=box, label=OR]\n");
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=OR]\n");
+            break;
+        case T_NOT:
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=NOT]\n");
             break;
         case T_ADD:
-            printf("[fillcolor=darkolivegreen3, shape=box, label=\"+\"]\n");
+            printf("[fillcolor=darkolivegreen3, shape=box, style=\"filled\", label=\"+\"]\n");
             break;
         case T_MULTIPLY:
-            printf("[fillcolor=darkolivegreen3, shape=box, label=\"&times;\"]\n");
+            printf("[fillcolor=darkolivegreen3, shape=box, style=\"filled\", label=\"&times;\"]\n");
             break;
         case T_INTEGER:
             printf("[shape=oval, label=\"%d\"]\n", ast->value.integer);
+            break;
+        case T_BOOLEAN:
+            printf("[shape=oval, label=\"%s\"]\n", ast->value.boolean? "true":"false");
             break;
         case T_REAL:
             printf("[shape=oval, label=\"%f\"]\n", ast->value.real);
             break;
         case T_GREATER:
-            printf("[fillcolor=darkslategray3, shape=box, label=\">\"]\n");
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=\">\"]\n");
             break;
         case T_LESS:
-            printf("[fillcolor=darkslategray3, shape=box, label=\"<\"]\n");
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=\"<\"]\n");
+            break;
+        case T_EQUAL:
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=\"==\"]\n");
+            break;
+        case T_XOR:
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=\"XOR\"]\n");
+            break;
+        case T_UNEQUAL:
+            printf("[fillcolor=darkslategray3, shape=box, style=\"filled\", label=\"!=\"]\n");
+            break;
+        case T_NEGATIVE:
+            printf("[fillcolor=darkolivegreen3, shape=box, style=\"filled\", label=\"-\"]\n");
             break;
         default:
             printf("\n");
@@ -258,6 +276,10 @@ void ast_print(struct st_ast * ast)
         printf("\"%p\" -> {\"%p\" \"%p\"}\n", ast, ast->left, ast->right);
         ast_print(ast->left);
         ast_print(ast->right);
+    }
+    else if (ast->left) {
+        printf("\"%p\" -> {\"%p\"}\n", ast, ast->left);
+        ast_print(ast->left);
     }
 }
 

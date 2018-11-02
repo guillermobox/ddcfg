@@ -59,6 +59,7 @@ WARNING
 WARNING
     DESCRIPTION Another way of doing the previous, that scalates to 3 or more
     CONDITION A.q1
+
 WARNING
     DESCRIPTION Combination of bools and also integer
     CONDITION (A.x + A.z < 2) OR A.q1
@@ -70,3 +71,7 @@ WARNING
 WARNING
     DESCRIPTION Another combination of different types
     CONDITION (3 > 0 AND -2.0 > 0.0) OR (yes AND 5 > 2.0)
+
+WARNING
+    DESCRIPTION Nested parenthesis
+    CONDITION (1 + (3 + 5) * 3) * 4 == 100
