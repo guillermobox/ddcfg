@@ -1,5 +1,5 @@
 SECTION A
-    DESCRIPTION Doesnt matter, I just want all constraints to activate!
+    DESCRIPTION None of the following will fail
     PROPERTY x
         TYPE integer
         DEFAULT 1
@@ -18,62 +18,66 @@ SECTION A
 
 WARNING
     DESCRIPTION Basic test
-    CONDITION A.x == 1
+    ASSERT A.x == 1
+
+WARNING
+    DESCRIPTION Another basic test, but this one is a rejection, not assertion
+    REJECT A.x < 0
 
 WARNING
     DESCRIPTION Composited test
-    CONDITION A.x == 1 AND A.y == 2 AND A.z == 3
+    ASSERT A.x == 1 AND A.y == 2 AND A.z == 3
 
 WARNING
     DESCRIPTION Multiplication and addition have a particular order
-    CONDITION A.x + A.y * A.z == 7
+    ASSERT A.x + A.y * A.z == 7
 
 WARNING
     DESCRIPTION Check parenthesis with arithmetic operations
-    CONDITION (A.x + A.y) * (A.x + A.z) == 12
+    ASSERT (A.x + A.y) * (A.x + A.z) == 12
 
 WARNING
     DESCRIPTION Check also unitary negative
-    CONDITION -A.x < 0
+    ASSERT -A.x < 0
 
 WARNING
     DESCRIPTION Integers should cast to reals
-    CONDITION A.x + 1.0 > 1.9999 AND A.x + 1.0 < 2.0001
+    ASSERT A.x + 1.0 > 1.9999 AND A.x + 1.0 < 2.0001
 
 WARNING
     DESCRIPTION This is true
-    CONDITION A.q1
+    ASSERT A.q1
 
 WARNING
     DESCRIPTION This is not false
-    CONDITION NOT A.q2
+    ASSERT NOT A.q2
 
 WARNING
     DESCRIPTION A combination of bools
-    CONDITION A.q1 AND (A.q2 OR true)
+    ASSERT A.q1 AND (A.q2 OR true)
 
 WARNING
     DESCRIPTION Xor is useful to have one of two keys, but only one
-    CONDITION A.q1 XOR A.q2
+    ASSERT A.q1 XOR A.q2
 
 WARNING
     DESCRIPTION Combination of bools and also integer
-    CONDITION (A.x + A.z < 2) OR A.q1
+    ASSERT (A.x + A.z < 2) OR A.q1
 
 WARNING
     DESCRIPTION Combinations of different types, no variables here
-    CONDITION 1 > 3 OR 1.0 > 3 OR yes
+    ASSERT 1 > 3 OR 1.0 > 3 OR yes
 
 WARNING
     DESCRIPTION Another combination of different types
-    CONDITION (3 > 0 AND -2.0 > 0.0) OR (yes AND 5 > 2.0)
+    ASSERT (3 > 0 AND -2.0 > 0.0) OR (yes AND 5 > 2.0)
 
 WARNING
     DESCRIPTION Nested parenthesis
-    CONDITION (1 + (3 + 5) * 3) * 4 == 100
+    ASSERT (1 + (3 + 5) * 3) * 4 == 100
 
 WARNING
     DESCRIPTION This should warn, but it wont because it depends on a key which is false,
     DESCRIPTION so it won't be checked, but skipped.
     DEPENDS_ON A.q2
-    CONDITION 0 == 1
+    ASSERT 0 == 1

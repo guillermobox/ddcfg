@@ -58,9 +58,13 @@ FAILURE {
 WARNING {
     return T_WARNING;
 }
-CONDITION {
+REJECT {
     BEGIN(literalexpresion);
-    return T_CONDITION;
+    return T_REJECT;
+}
+ASSERT {
+    BEGIN(literalexpresion);
+    return T_ASSERT;
 }
 PROPERTY {
     BEGIN(halfname);

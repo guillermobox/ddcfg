@@ -1,5 +1,5 @@
 SECTION A
-    DESCRIPTION Doesnt matter, I just want all constraints to activate!
+    DESCRIPTION All the following conditions will fail
     PROPERTY x
         TYPE integer
         DEFAULT 1
@@ -18,12 +18,12 @@ SECTION A
 
 WARNING
     DESCRIPTION Basic test
-    CONDITION A.x != 1
+    ASSERT A.x != 1
 
 FAILURE
     DESCRIPTION Composited test
-    CONDITION A.x + A.y > A.z
+    ASSERT A.x + A.y > A.z
 
 FAILURE
     DESCRIPTION This is not a boolean, even though is valued 1
-    CONDITION A.x
+    ASSERT A.x

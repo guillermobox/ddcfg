@@ -14,7 +14,7 @@ struct st_spec {
 
 struct st_spec_constraint {
 	char * description;
-	enum yytokentype type;
+	enum yytokentype type, flavour;
 	const char * expression;
 
 	struct st_spec_property * depends_on;

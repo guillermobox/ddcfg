@@ -331,7 +331,10 @@ int spec_check_constraint(struct st_spec_constraint * constraint)
 		return 0;
 
 	result = evaluate(constraint->ast);
-	if (result.boolean != 1) {
+
+	if ( (constraint->flavour == T_ASSERT && result.boolean != 1 ) ||
+		 (constraint->flavour == T_REJECT && result.boolean != 0))
+	 {
 		err += 1;
 		if (constraint->type == T_FAILURE)
 			spec_add_error();

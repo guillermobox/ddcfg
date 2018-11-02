@@ -276,7 +276,7 @@ void bison_parse() {
 
 /* keywords for sections */
 %token T_SECMARKER T_DESCRIPTION T_PROPERTY T_TYPE
-%token T_FAILURE T_WARNING T_CONDITION T_DEPENDS_ON T_POINTS_TO T_DEFAULT
+%token T_FAILURE T_WARNING T_REJECT T_ASSERT T_DEPENDS_ON T_POINTS_TO T_DEFAULT
 %token T_VALUES
 
 /* This are aritmetic tokens */
@@ -413,10 +413,17 @@ constraintoption: T_DEPENDS_ON T_FULLNAME
 {
     queue_symbol($2, &activecons->depends_on, T_PROPERTY);
 };
-constraintoption: T_CONDITION T_LITERAL expr
+constraintoption: T_REJECT T_LITERAL expr
 {
     activecons->ast = $3;
     activecons->expression = $2;
+    activecons->flavour = T_REJECT;
+};
+constraintoption: T_ASSERT T_LITERAL expr
+{
+    activecons->ast = $3;
+    activecons->expression = $2;
+    activecons->flavour = T_ASSERT;
 };
 
 options
