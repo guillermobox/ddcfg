@@ -39,6 +39,15 @@ tests:
     output : All clear
     return : 0
 
+  - name   : RightConstraints
+    run    : ./testdriver Tests/empty.ini Tests/constraints.spec
+    output : All clear
+    return : 0
+
+  - name   : FailConstraints
+    run    : ./testdriver Tests/empty.ini Tests/failingconstraints.spec
+    output : "1 warnings found!\n2 errors found!"
+
   - name   : SelectFunction
     run    : ./test_select Tests/select.ini
     return : 0

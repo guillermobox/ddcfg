@@ -14,8 +14,22 @@ extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
 
 struct st_spec * spec = NULL;
 
+int spec_error_count = 0;
+int spec_warning_count = 0;
+
+static void spec_add_error()
+{
+	spec_error_count += 1;
+};
+
+static void spec_add_warning()
+{
+	spec_warning_count += 1;
+};
+
 static void spec_error(const char *errormsg, struct st_spec_property *prop)
 {
+	spec_add_error();
 	if (prop == NULL)
 		fprintf(stderr, "spec:???:%s\n", errormsg);
 	else
@@ -26,14 +40,21 @@ static void spec_error(const char *errormsg, struct st_spec_property *prop)
 int spec_check()
 {
 	struct st_spec_section * section;
-	int err = 0;
+	struct st_spec_constraint * constraint;
 
 	/* check that the spec complies with the database */
 	section = spec->sections;
 	while (section) {
 		if (section->type == T_SECTION)
-			err += spec_check_section(section);
+			spec_check_section(section);
 		section = section->next;
+	}
+
+	/* check the constraints */
+	constraint = spec->constraints;
+	while (constraint) {
+		spec_check_constraint(constraint);
+		constraint = constraint->next;
 	}
 
 	/* check that no other items in the database are unchecked */
@@ -45,12 +66,11 @@ int spec_check()
 		prop = lookup(items[i]);
 		if (prop && !(prop->status & STATUS_CHECKED)) {
 			fprintf(stderr, "spec:??:%s:Property not found in spec\n", items[i]);
-			err += 1;
 		}
 	}
 	free(items);
 
-	return err;
+	return spec_error_count + spec_warning_count;
 };
 
 int spec_check_type(struct st_spec_property *property, char * value)
@@ -287,6 +307,29 @@ int spec_check_section(struct st_spec_section *section)
 		err += spec_check_property(section, property, section->name);
 		property = property->next;
 	};
+	return err;
+}
+
+int spec_check_constraint(struct st_spec_constraint * constraint)
+{
+	int err = 0;
+	struct st_ast_value result;
+
+	result = evaluate(constraint->ast);
+	if (result.boolean != 1) {
+		err += 1;
+		if (constraint->type == T_FAILURE)
+			spec_add_error();
+		else
+			spec_add_warning();
+	}
+	if (result.type != T_TYPE_BOOLEAN) {
+		err += 1;
+		if (constraint->type == T_FAILURE)
+			spec_add_error();
+		else
+			spec_add_warning();
+	}
 	return err;
 }
 

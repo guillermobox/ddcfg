@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include "../ddcfg.h"
 
+extern int spec_error_count;
+extern int spec_warning_count;
+
 int main(int argc, char *argv[])
 {
 	int errno;
@@ -29,8 +32,13 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		};
 
-		if ((errno = ddcfg_check_spec())){
-			printf("%d errors found!\n", errno);
+		if (ddcfg_check_spec()){
+			if (spec_warning_count) {
+				printf("%d warnings found!\n", spec_warning_count);
+			}
+			if (spec_error_count) {
+				printf("%d errors found!\n", spec_error_count);
+			}
 		} else {
 			printf("All clear\n");
 		}

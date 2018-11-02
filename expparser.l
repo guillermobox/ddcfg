@@ -140,10 +140,10 @@ DESCRIPTION {
         return T_BOOLEAN;
     }
 
-
     "OR"    yylval.token = T_OR; return T_OR;
     "AND"   yylval.token = T_AND; return T_AND;
     "NOT"   yylval.token = T_NOT; return T_NOT;
+    "XOR"   yylval.token = T_XOR; return T_XOR;
 
     "+"     yylval.token = T_ADD; return T_ADD;
     "*"     yylval.token = T_MULTIPLY; return T_MULTIPLY;
@@ -154,6 +154,7 @@ DESCRIPTION {
     "<="    yylval.token = T_LESS_EQUAL; return T_LESS_EQUAL;
     ">="    yylval.token = T_GREATER_EQUAL; return T_GREATER_EQUAL;
     "=="    yylval.token = T_EQUAL; return T_EQUAL;
+    "!="    yylval.token = T_UNEQUAL; return T_UNEQUAL;
 
     [(] { return '('; }
     [)] { return ')'; }

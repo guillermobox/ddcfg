@@ -56,7 +56,7 @@ int spec_new_from_data(unsigned char * data, unsigned int length);
 
 struct st_spec_section * lookup_section(struct st_spec *spec, const char *secname);
 struct st_spec_property * lookup_property(struct st_spec *spec, const char *secname, const char *propname);
-
+int spec_check_constraint(struct st_spec_constraint * constraint);
 int spec_check_type(struct st_spec_property *property, char * value);
 int spec_internal_consistency(struct st_spec_section *section, struct st_spec_property *property);
 int spec_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname);

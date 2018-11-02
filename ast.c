@@ -70,7 +70,6 @@ struct st_ast_value fetch_symbol(const char *fullname)
     struct st_spec_property * prop = property_from_string(fullname);
 
     val.type = prop->type;
-
     switch(val.type) {
         case T_TYPE_REAL:
             val.real = ddcfg_double(NULL, fullname); break;
@@ -80,7 +79,6 @@ struct st_ast_value fetch_symbol(const char *fullname)
             val.boolean = ddcfg_bool(NULL, fullname); break;
         default: break;
     }
-
     return val;
 }
 
@@ -117,12 +115,23 @@ struct st_ast_value evaluate(struct st_ast *ast)
     switch(ast->op) {
         case T_INTEGER:
         case T_REAL:
+        case T_BOOLEAN:
             return ast->value;
         case T_FULLNAME:
             result = fetch_symbol(ast->value.name);
             return result;
+        case T_NEGATIVE:
+            left = evaluate(ast->left);
+            result = left;
+            if (result.type == T_TYPE_REAL)
+                result.real = -result.real;
+            else
+                result.integer = -result.integer;
+            return result;
         case T_NOT:
-            result.boolean = !ast->left->value.boolean;
+            left = evaluate(ast->left);
+            result.boolean = !left.boolean;
+            result.type = T_TYPE_BOOLEAN;
             return result;
         default:
             break;
@@ -152,8 +161,16 @@ struct st_ast_value evaluate(struct st_ast *ast)
                 result.boolean = left.real < right.real;
                 result.type = T_TYPE_BOOLEAN;
                 return result;
+            case T_EQUAL:
+                result.boolean = left.real == right.real;
+                result.type = T_TYPE_BOOLEAN;
+                return result;
+            case T_UNEQUAL:
+                result.boolean = left.real != right.real;
+                result.type = T_TYPE_BOOLEAN;
+                return result;
             default:
-                printf("Unknown!\n");
+                printf("Unknown REAL!\n");
         }
     } else if(result.type == T_TYPE_INTEGER) {
         switch(ast->op) {
@@ -171,8 +188,16 @@ struct st_ast_value evaluate(struct st_ast *ast)
                 result.boolean = left.integer < right.integer;
                 result.type = T_TYPE_BOOLEAN;
                 return result;
+            case T_EQUAL:
+                result.boolean = left.integer == right.integer;
+                result.type = T_TYPE_BOOLEAN;
+                return result;
+            case T_UNEQUAL:
+                result.boolean = left.integer != right.integer;
+                result.type = T_TYPE_BOOLEAN;
+                return result;
             default:
-                printf("Unknown!\n");
+                printf("Unknown INTEGER!\n");
         }
     } else if (result.type == T_TYPE_BOOLEAN) {
         switch (ast->op) {
@@ -181,6 +206,9 @@ struct st_ast_value evaluate(struct st_ast *ast)
                 return result;
             case T_OR:
                 result.boolean = left.boolean || right.boolean;
+                return result;
+            case T_XOR:
+                result.boolean = left.boolean ^ right.boolean;
                 return result;
             default:
                 printf("Unknown for boolean operation\n");

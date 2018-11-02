@@ -280,11 +280,11 @@ void bison_parse() {
 %token T_VALUES
 
 /* This are aritmetic tokens */
-%token <token> T_ADD T_MULTIPLY T_SUBSTRACT
+%token <token> T_ADD T_MULTIPLY T_SUBSTRACT T_NEGATIVE
 
 /* There are the binary tokens */
-%token <token> T_OR T_AND T_NOT
-%token <token> T_LESS T_GREATER T_LESS_EQUAL T_GREATER_EQUAL T_EQUAL
+%token <token> T_OR T_AND T_NOT T_XOR
+%token <token> T_LESS T_GREATER T_LESS_EQUAL T_GREATER_EQUAL T_EQUAL T_UNEQUAL
 
 /* types for the properties */
 %token <token> T_TYPETOKEN T_TYPE_INTEGER T_TYPE_REAL T_TYPE_BOOLEAN T_TYPE_STRING T_TYPE_SUBSECTION
@@ -378,18 +378,20 @@ expr: expr T_ADD expr {$$ = newnode($2, $1, $3);};
 expr: expr T_MULTIPLY expr {$$ = newnode($2, $1, $3);};
 expr: expr T_SUBSTRACT expr {$$ = newnode($2, $1, $3);};
 expr: expr T_AND expr {$$ = newnode($2, $1, $3);};
+expr: expr T_XOR expr {$$ = newnode($2, $1, $3);};
 expr: expr T_OR expr {$$ = newnode($2, $1, $3);};
 expr: expr T_LESS expr {$$ = newnode($2, $1, $3);};
 expr: expr T_GREATER expr {$$ = newnode($2, $1, $3);};
 expr: expr T_LESS_EQUAL expr {$$ = newnode($2, $1, $3);};
 expr: expr T_GREATER_EQUAL expr {$$ = newnode($2, $1, $3);};
 expr: expr T_EQUAL expr {$$ = newnode($2, $1, $3);};
+expr: expr T_UNEQUAL expr {$$ = newnode($2, $1, $3);};
 expr: T_NOT expr {$$ = newnode($1, $2, NULL);};
-
+expr: T_SUBSTRACT expr {$$ = newnode(T_NEGATIVE, $2, NULL);};
 
 properties
-    : property
-    | property properties
+    : /* empty */
+    | properties property 
     ;
 
 property: beginproperty options 
