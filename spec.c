@@ -182,6 +182,32 @@ char * fullname_from_property(struct st_spec_property * prop)
 	return buffer;
 }
 
+static int check_if_required(struct st_spec_property * depends_on)
+{
+	struct st_spec_property * remote = depends_on;
+	struct nlist *search;
+	const char *key;
+	int boolvalue, err;
+
+	if (remote == NULL)
+		return 1;
+	
+	key = fullname_from_property(remote);
+	search = lookup(key);
+	free((void*)key);
+
+	if (search) {
+		err = ddcfg_parse_bool(search->value, &boolvalue);
+		if (err == 0 && boolvalue == 0) return 0;
+	} else {
+		if (remote->defaultvalue) {
+			err = ddcfg_parse_bool(remote->defaultvalue, &boolvalue);
+			if (err == 0 && boolvalue == 0) return 0;
+		}
+	}
+	return 1;
+}
+
 int spec_check_property(struct st_spec_section *section, struct st_spec_property *property, const char *secname)
 {
 	const char * value, *key;
@@ -197,26 +223,12 @@ int spec_check_property(struct st_spec_section *section, struct st_spec_property
 			handler(secname, property->name, property->defaultvalue);
 			value = property->defaultvalue;
 		} else {
-			if (property->depends_on) {
-				struct st_spec_property * remote = property->depends_on;
-				struct nlist *search;
-				int boolvalue;
-				
-				key = fullname_from_property(remote);
-				search = lookup(key);
-				free((void*)key);
-				if (search) {
-					err = ddcfg_parse_bool(search->value, &boolvalue);
-					if (err == 0 && boolvalue == 0) return 0;
-				} else {
-					if (remote->defaultvalue) {
-						err = ddcfg_parse_bool(remote->defaultvalue, &boolvalue);
-						if (err == 0 && boolvalue == 0) return 0;
-					}
-				}
+			if (check_if_required(property->depends_on)) {
+				spec_error("Property not found", property);
+				return 1;
+			} else {
+				return 0;
 			}
-			spec_error("Property not found", property);
-			return 1;
 		}
 	}
 
@@ -314,6 +326,9 @@ int spec_check_constraint(struct st_spec_constraint * constraint)
 {
 	int err = 0;
 	struct st_ast_value result;
+
+	if (check_if_required(constraint->depends_on) == 0)
+		return 0;
 
 	result = evaluate(constraint->ast);
 	if (result.boolean != 1) {

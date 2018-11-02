@@ -57,10 +57,6 @@ WARNING
     CONDITION A.q1 XOR A.q2
 
 WARNING
-    DESCRIPTION Another way of doing the previous, that scalates to 3 or more
-    CONDITION A.q1
-
-WARNING
     DESCRIPTION Combination of bools and also integer
     CONDITION (A.x + A.z < 2) OR A.q1
 
@@ -75,3 +71,9 @@ WARNING
 WARNING
     DESCRIPTION Nested parenthesis
     CONDITION (1 + (3 + 5) * 3) * 4 == 100
+
+WARNING
+    DESCRIPTION This should warn, but it wont because it depends on a key which is false,
+    DESCRIPTION so it won't be checked, but skipped.
+    DEPENDS_ON A.q2
+    CONDITION 0 == 1
